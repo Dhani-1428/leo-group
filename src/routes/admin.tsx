@@ -276,7 +276,7 @@ function ProductEditor({ product, onSave, onCancel }: { product: Product; onSave
           <Field label={t("admin.tag")}><input className={input} value={draft.tag} onChange={(e) => setDraft({ ...draft, tag: e.target.value })} /></Field>
           <Field label={t("admin.category")}>
             <select className={input} value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value as Category })}>
-              <option value="parfum" className="bg-black">parfum</option>
+              <option value="parfum" className="bg-black">Perfume</option>
               <option value="tech" className="bg-black">tech</option>
             </select>
           </Field>

@@ -1,15 +1,18 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { productsByCategory, type Category } from "@/lib/products";
+import type { Category } from "@/lib/products";
+import { fetchPublicByCategory } from "@/lib/catalogFns";
 import { TechSubNav, PerfumeSubNav } from "@/components/CategorySubNav";
 import { useI18n } from "@/lib/i18n";
 import { useEffect } from "react";
 import { useCategory } from "@/lib/categoryContext";
 
 export const Route = createFileRoute("/shop/$category/$sub")({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
     if (params.category !== "tech" && params.category !== "parfum") throw notFound();
-    return { category: params.category as Category, sub: params.sub };
+    const category = params.category as Category;
+    const products = await fetchPublicByCategory({ data: { category } });
+    return { category, sub: params.sub, products };
   },
   head: ({ loaderData }) => {
     const title = loaderData
@@ -27,13 +30,12 @@ export const Route = createFileRoute("/shop/$category/$sub")({
 });
 
 function ShopPage() {
-  const { category, sub } = Route.useLoaderData();
+  const { category, sub, products: all } = Route.useLoaderData();
   const { t } = useI18n();
   const { setCategory } = useCategory();
 
   useEffect(() => { setCategory(category); }, [category, setCategory]);
 
-  const all = productsByCategory(category);
   const list = sub === "all" ? all : all.filter((p) => p.subCategory === sub);
 
   const label = sub.replace(/-/g, " ");

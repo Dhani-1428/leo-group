@@ -17,6 +17,9 @@ dist-ssr
 .nitro
 *.local
 
+# Shared catalog persistence (generated at runtime)
+data/catalog.json
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

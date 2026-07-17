@@ -41,6 +41,7 @@ export type TechSubCategory =
 export type FragranceNotes = { top: string[]; heart: string[]; base: string[] };
 export type TechSpecs = Record<string, string>;
 export type Review = { name: string; title: string; rating: number; body: string; date: string };
+export type PublishStatus = "published" | "draft";
 
 export type Product = {
   id: string;
@@ -64,6 +65,12 @@ export type Product = {
   inTheBox?: string[];
   reviews: Review[];
   rating: number;
+
+  /** Inventory + publish fields (shared catalog / admin panel) */
+  stock?: number;
+  status?: PublishStatus;
+  updatedAt?: string;
+  sku?: string;
 };
 
 const baseReviews: Review[] = [
@@ -110,9 +117,9 @@ export const products: Product[] = [
     short: "A smoked oud rendered in liquid amber. The signature of the house.",
     description: "Composed over eighteen months in our Grasse atelier, Oud Imperial pairs Laotian oud with smoked papyrus and Damask rose absolute over dry, resinous benzoin.",
     notes: { top: ["Bergamot", "Pink Pepper", "Saffron"], heart: ["Laotian Oud", "Damask Rose", "Smoked Papyrus"], base: ["Benzoin", "Patchouli", "White Musk"] },
-    concentration: "Extrait de Parfum 30%", volumes: ["50ml", "100ml", "200ml"],
+    concentration: "Extrait de Perfume 30%", volumes: ["50ml", "100ml", "200ml"],
     perfumer: "Élise Marchand",
-    ingredients: "Alcohol Denat., Parfum (Fragrance), Aqua, Limonene, Linalool, Citral, Geraniol, Eugenol, Coumarin.",
+    ingredients: "Alcohol Denat., Perfume (Fragrance), Aqua, Limonene, Linalool, Citral, Geraniol, Eugenol, Coumarin.",
     rating: 4.9, reviews: baseReviews,
   },
   {
@@ -121,18 +128,18 @@ export const products: Product[] = [
     short: "Velvet amber, vanilla orchid and a hush of leather.",
     description: "Mandarin and pink berry open, vanilla orchid and tonka settle, amber suede and white sandalwood close.",
     notes: { top: ["Mandarin", "Pink Berry", "Cardamom"], heart: ["Vanilla Orchid", "Tonka Bean", "Iris"], base: ["Amber", "Suede", "White Sandalwood"] },
-    concentration: "Eau de Parfum 22%", volumes: ["50ml", "100ml"],
-    perfumer: "Henri Vasseur", ingredients: "Alcohol Denat., Parfum, Aqua, Linalool, Coumarin, Benzyl Salicylate.",
+    concentration: "Eau de Perfume 22%", volumes: ["50ml", "100ml"],
+    perfumer: "Henri Vasseur", ingredients: "Alcohol Denat., Perfume, Aqua, Linalool, Coumarin, Benzyl Salicylate.",
     rating: 4.8, reviews: baseReviews,
   },
   {
-    id: "nuit-cristalline", category: "parfum", subCategory: "limited-edition", name: "Nuit Cristalline", line: "Haute Parfumerie",
+    id: "nuit-cristalline", category: "parfum", subCategory: "limited-edition", name: "Nuit Cristalline", line: "Haute Perfumery",
     price: 540, tag: "Limited", images: [p2, p1, p3, perfumeHero],
     short: "Cold iris, frozen violet, a single drop of incense.",
     description: "Limited edition of 1200 numbered flacons built around cold iris, dewed violet and Somalian incense.",
     notes: { top: ["Aldehydes", "Violet Leaf", "Bergamot"], heart: ["Iris Pallida", "Orris Butter", "Damascena Rose"], base: ["Somalian Incense", "Cashmeran", "Vetiver"] },
-    concentration: "Extrait de Parfum 28%", volumes: ["75ml"],
-    perfumer: "Élise Marchand", ingredients: "Alcohol Denat., Parfum, Aqua, Limonene, Linalool, Eugenol.",
+    concentration: "Extrait de Perfume 28%", volumes: ["75ml"],
+    perfumer: "Élise Marchand", ingredients: "Alcohol Denat., Perfume, Aqua, Limonene, Linalool, Eugenol.",
     rating: 5.0, reviews: baseReviews,
   },
   {
@@ -141,8 +148,8 @@ export const products: Product[] = [
     short: "Black rose, blood orange and a smoked vanilla base.",
     description: "Blood orange and pink pepper open onto smoked Turkish rose, settled in dark vanilla and oud wood.",
     notes: { top: ["Blood Orange", "Pink Pepper", "Cassis"], heart: ["Turkish Rose", "Smoked Tea", "Saffron"], base: ["Dark Vanilla", "Oud Wood", "Tonka"] },
-    concentration: "Eau de Parfum 20%", volumes: ["50ml", "100ml"],
-    perfumer: "Henri Vasseur", ingredients: "Alcohol Denat., Parfum, Aqua, Citral, Geraniol, Coumarin.",
+    concentration: "Eau de Perfume 20%", volumes: ["50ml", "100ml"],
+    perfumer: "Henri Vasseur", ingredients: "Alcohol Denat., Perfume, Aqua, Citral, Geraniol, Coumarin.",
     rating: 4.7, reviews: baseReviews,
   },
   {
@@ -152,7 +159,7 @@ export const products: Product[] = [
     description: "A traditional alcohol-free attar aged in sandalwood casks. Warm, resinous and intimate on the skin.",
     notes: { top: ["Saffron", "Cardamom"], heart: ["Taif Rose", "White Oud"], base: ["Sandalwood", "Amber"] },
     concentration: "Pure Attar Oil 100%", volumes: ["6ml", "12ml"],
-    perfumer: "Élise Marchand", ingredients: "Parfum Oil (Sandalwood base), Natural Isolates.",
+    perfumer: "Élise Marchand", ingredients: "Perfume Oil (Sandalwood base), Natural Isolates.",
     rating: 4.9, reviews: baseReviews,
   },
   {
@@ -162,7 +169,7 @@ export const products: Product[] = [
     description: "Aged Hindi oud pressed into a sandalwood carrier oil — dense, animalic and long-wearing.",
     notes: { top: ["Cinnamon"], heart: ["Hindi Oud", "Rose"], base: ["Musk", "Amber", "Sandalwood"] },
     concentration: "Pure Attar Oil 100%", volumes: ["6ml", "12ml"],
-    perfumer: "Henri Vasseur", ingredients: "Parfum Oil (Sandalwood base), Natural Isolates.",
+    perfumer: "Henri Vasseur", ingredients: "Perfume Oil (Sandalwood base), Natural Isolates.",
     rating: 4.9, reviews: baseReviews,
   },
   {
@@ -179,8 +186,8 @@ export const products: Product[] = [
     price: 25, tag: "Tester", images: [p3, p1, p2, perfumeHero],
     short: "A 5ml travel tester of our woody signature.",
     description: "A travel-format tester of the Monsieur Bois extrait — cedar, vetiver and smoked leather.",
-    concentration: "Extrait de Parfum 25%", volumes: ["5ml"],
-    perfumer: "Henri Vasseur", ingredients: "Alcohol Denat., Parfum, Aqua, Coumarin.",
+    concentration: "Extrait de Perfume 25%", volumes: ["5ml"],
+    perfumer: "Henri Vasseur", ingredients: "Alcohol Denat., Perfume, Aqua, Coumarin.",
     rating: 4.7, reviews: baseReviews,
   },
   {
@@ -189,8 +196,8 @@ export const products: Product[] = [
     short: "Peony, lychee and white musk — luminous and modern.",
     description: "A luminous floral for daylight — dewy peony, ripe lychee and airy white musk.",
     notes: { top: ["Lychee", "Bergamot"], heart: ["Peony", "Magnolia", "Freesia"], base: ["White Musk", "Cedar"] },
-    concentration: "Eau de Parfum 20%", volumes: ["50ml", "100ml"],
-    perfumer: "Élise Marchand", ingredients: "Alcohol Denat., Parfum, Aqua, Linalool, Citronellol.",
+    concentration: "Eau de Perfume 20%", volumes: ["50ml", "100ml"],
+    perfumer: "Élise Marchand", ingredients: "Alcohol Denat., Perfume, Aqua, Linalool, Citronellol.",
     rating: 4.8, reviews: baseReviews,
   },
   {
@@ -199,8 +206,8 @@ export const products: Product[] = [
     short: "Cedar, vetiver and smoked leather — a woody signature.",
     description: "A masculine woody built on Virginia cedar, Haitian vetiver and smoked leather accord.",
     notes: { top: ["Grapefruit", "Black Pepper"], heart: ["Virginia Cedar", "Haitian Vetiver"], base: ["Smoked Leather", "Amber", "Musk"] },
-    concentration: "Extrait de Parfum 25%", volumes: ["50ml", "100ml"],
-    perfumer: "Henri Vasseur", ingredients: "Alcohol Denat., Parfum, Aqua, Coumarin, Eugenol.",
+    concentration: "Extrait de Perfume 25%", volumes: ["50ml", "100ml"],
+    perfumer: "Henri Vasseur", ingredients: "Alcohol Denat., Perfume, Aqua, Coumarin, Eugenol.",
     rating: 4.8, reviews: baseReviews,
   },
 

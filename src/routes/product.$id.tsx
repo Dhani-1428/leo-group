@@ -5,19 +5,22 @@ import {
   ChevronRight, Heart, ShoppingBag, Star, Truck, Shield, RotateCcw,
   Plus, Minus, Check, ArrowUpRight, Sparkles,
 } from "lucide-react";
-import { getProduct, getRelated, type Product } from "@/lib/products";
+import type { Product } from "@/lib/products";
+import { fetchPublicProduct, fetchRelatedProducts } from "@/lib/catalogFns";
 
 export const Route = createFileRoute("/product/$id")({
-  loader: ({ params }) => {
-    const product = getProduct(params.id);
+  loader: async ({ params }) => {
+    const product = await fetchPublicProduct({ data: { id: params.id } });
     if (!product) throw notFound();
-    return { product };
+    const related = await fetchRelatedProducts({ data: { id: params.id, n: 3 } });
+    return { product, related };
   },
   head: ({ loaderData }) => {
     const p = loaderData?.product;
     const title = p ? `${p.name} — ${p.line} | MAISON AURUM` : "MAISON AURUM";
     const desc = p?.short ?? "MAISON AURUM";
     const img = p?.images[0];
+    const inStock = (p?.stock ?? 1) > 0;
     return {
       meta: [
         { title },
@@ -41,7 +44,9 @@ export const Route = createFileRoute("/product/$id")({
                 "@type": "Offer",
                 priceCurrency: "EUR",
                 price: p.price,
-                availability: "https://schema.org/InStock",
+                availability: inStock
+                  ? "https://schema.org/InStock"
+                  : "https://schema.org/OutOfStock",
               },
               aggregateRating: {
                 "@type": "AggregateRating",
@@ -366,8 +371,7 @@ function Reviews({ p }: { p: Product }) {
 }
 
 /* ---------- Related ---------- */
-function Related({ p }: { p: Product }) {
-  const items = getRelated(p, 3);
+function Related({ items }: { items: Product[] }) {
   return (
     <section className="border-t border-gold/10 bg-obsidian-2 py-24">
       <div className="mx-auto max-w-[1500px] px-6 lg:px-12">
@@ -415,8 +419,10 @@ function Related({ p }: { p: Product }) {
 
 /* ---------- Page ---------- */
 function ProductPage() {
-  const { product: p } = Route.useLoaderData();
+  const { product: p, related } = Route.useLoaderData();
   const isParfum = p.category === "parfum";
+  const inStock = (p.stock ?? 1) > 0;
+  const lowStock = inStock && (p.stock ?? 0) > 0 && (p.stock ?? 0) < 10;
 
   const [variant, setVariant] = useState<string>(isParfum ? p.volumes?.[1] ?? "" : "");
   const [qty, setQty] = useState(1);
@@ -424,6 +430,7 @@ function ProductPage() {
   const [added, setAdded] = useState(false);
 
   const addToCart = () => {
+    if (!inStock) return;
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   };
@@ -435,7 +442,7 @@ function ProductPage() {
         <ol className="flex flex-wrap items-center gap-2">
           <li><Link to="/" className="hover:text-gold">HOME</Link></li>
           <li><ChevronRight className="h-3 w-3 text-gold/40" /></li>
-          <li className="hover:text-gold">{isParfum ? "MAISON DE PARFUM" : "STUDIO TECH"}</li>
+          <li className="hover:text-gold">{isParfum ? "MAISON DE PERFUME" : "STUDIO TECH"}</li>
           <li><ChevronRight className="h-3 w-3 text-gold/40" /></li>
           <li className="text-gold">{p.name.toUpperCase()}</li>
         </ol>
@@ -472,6 +479,14 @@ function ProductPage() {
               <div className="font-display text-4xl text-gold-gradient">€{p.price * qty}</div>
               <div className="text-xs tracking-[0.2em] text-muted-foreground">EUR · Tax included</div>
             </div>
+
+            {!inStock ? (
+              <div className="mt-4 text-[10px] tracking-[0.35em] text-red-400">OUT OF STOCK</div>
+            ) : lowStock ? (
+              <div className="mt-4 text-[10px] tracking-[0.35em] text-amber-300/90">
+                LOW STOCK · {p.stock} LEFT
+              </div>
+            ) : null}
 
             {/* Variants */}
             {isParfum && p.volumes && (
@@ -515,19 +530,22 @@ function ProductPage() {
               <div className="flex gap-3">
                 <button
                   onClick={addToCart}
+                  disabled={!inStock}
                   data-cursor
-                  className="group relative flex-1 overflow-hidden rounded-full bg-gold-gradient py-5 text-xs font-semibold tracking-[0.3em] text-obsidian transition-transform hover:scale-[1.01]"
+                  className="group relative flex-1 overflow-hidden rounded-full bg-gold-gradient py-5 text-xs font-semibold tracking-[0.3em] text-obsidian transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
                 >
                   <AnimatePresence mode="wait">
                     <motion.span
-                      key={added ? "added" : "add"}
+                      key={added ? "added" : inStock ? "add" : "oos"}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.25 }}
                       className="relative z-10 flex items-center justify-center gap-2"
                     >
-                      {added ? (
+                      {!inStock ? (
+                        <>OUT OF STOCK</>
+                      ) : added ? (
                         <>ADDED <Check className="h-3.5 w-3.5" strokeWidth={3} /></>
                       ) : (
                         <>ADD TO BAG <ShoppingBag className="h-3.5 w-3.5" /></>
@@ -546,7 +564,11 @@ function ProductPage() {
                   <Heart className={`h-4 w-4 ${wished ? "fill-gold" : ""}`} />
                 </button>
               </div>
-              <button data-cursor className="rounded-full border border-gold/30 py-5 text-xs font-medium tracking-[0.3em] text-foreground hover:bg-gold/5">
+              <button
+                disabled={!inStock}
+                data-cursor
+                className="rounded-full border border-gold/30 py-5 text-xs font-medium tracking-[0.3em] text-foreground hover:bg-gold/5 disabled:cursor-not-allowed disabled:opacity-40"
+              >
                 BUY NOW
               </button>
             </div>
@@ -573,7 +595,7 @@ function ProductPage() {
 
       <Tabs p={p} />
       <Reviews p={p} />
-      <Related p={p} />
+      <Related items={related} />
     </main>
   );
 }

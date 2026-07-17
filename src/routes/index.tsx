@@ -17,11 +17,15 @@ import atelierParfum from "@/assets/atelier-parfum.jpg";
 import atelierTech from "@/assets/atelier-tech.jpg";
 import { useCategory, type Category as SharedCategory } from "@/lib/categoryContext";
 import { useI18n } from "@/lib/i18n";
-import { productsByCategory, type Product, type TechSubCategory, type ParfumSubCategory } from "@/lib/products";
+import type { Product, TechSubCategory, ParfumSubCategory } from "@/lib/products";
+import { fetchPublicCatalog } from "@/lib/catalogFns";
 import { TechSubNav as SharedTechSubNav, PerfumeSubNav as SharedPerfumeSubNav } from "@/components/CategorySubNav";
 
 export const Route = createFileRoute("/")({
-
+  loader: async () => {
+    const products = await fetchPublicCatalog();
+    return { products };
+  },
   head: () => ({
     meta: [
       { title: "MAISON AURUM — Luxury Perfumes & Premium Mobile Accessories" },
@@ -585,7 +589,8 @@ function BestSellers({
   setParfumFilter: (s: ParfumSubCategory | "all") => void;
 }) {
   const { t } = useI18n();
-  const all = productsByCategory(category);
+  const { products } = Route.useLoaderData();
+  const all = products.filter((p) => p.category === category);
   const list: Product[] =
     category === "tech" && techFilter !== "all"
       ? all.filter((p) => p.subCategory === techFilter)
@@ -880,14 +885,14 @@ function Footer() {
         <div className="mb-16 grid gap-12 md:grid-cols-5">
           <div className="md:col-span-2">
             <div className="font-display text-2xl tracking-[0.4em]">MAISON <span className="text-gold-gradient">AURUM</span></div>
-            <p className="mt-6 max-w-xs text-sm text-muted-foreground">Haute parfumerie & engineered jewelry for the modern obsessive. Crafted in Europe, shipped worldwide.</p>
+            <p className="mt-6 max-w-xs text-sm text-muted-foreground">Haute perfumery & engineered jewelry for the modern obsessive. Crafted in Europe, shipped worldwide.</p>
             <div className="mt-8 flex gap-3 text-xs text-muted-foreground">
               <span className="flex items-center gap-2"><Truck className="h-3.5 w-3.5 text-gold" /> Free worldwide</span>
               <span className="flex items-center gap-2"><Shield className="h-3.5 w-3.5 text-gold" /> Lifetime authenticity</span>
             </div>
           </div>
           {[
-            { t: "Maison", l: ["Parfumerie", "Studio Tech", "Premium", "Editions"] },
+            { t: "Maison", l: ["Perfumery", "Studio Tech", "Premium", "Editions"] },
             { t: "Account", l: ["Sign in", "Orders", "Wishlist", "Members"] },
             { t: "Cared for", l: ["Contact", "Shipping", "Returns", "FAQ"] },
           ].map((c) => (

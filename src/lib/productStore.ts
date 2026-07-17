@@ -101,7 +101,7 @@ export function newBlankProduct(category: Category): Product {
       short: "",
       description: "",
       notes: { top: [], heart: [], base: [] },
-      concentration: "Eau de Parfum",
+      concentration: "Eau de Perfume",
       volumes: ["50ml"],
       perfumer: "",
       ingredients: "",
