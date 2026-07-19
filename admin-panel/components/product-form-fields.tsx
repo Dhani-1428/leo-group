@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { FormField } from '@/components/form-field'
+import { ImagePlus, Trash2, Upload } from 'lucide-react'
 import {
   PARFUM_SUBS,
   TECH_SUBS,
@@ -8,6 +10,7 @@ import {
   type Category,
   type PublishStatus,
 } from '@/lib/catalog-types'
+import { resolveImageUrl, uploadCatalogImage } from '@/lib/catalog-api'
 
 export type ProductFormState = {
   id: string
@@ -22,8 +25,7 @@ export type ProductFormState = {
   short: string
   description: string
   status: PublishStatus
-  images: string
-  // perfume
+  images: string[]
   concentration: string
   volumes: string
   perfumer: string
@@ -31,7 +33,6 @@ export type ProductFormState = {
   notesTop: string
   notesHeart: string
   notesBase: string
-  // tech
   specs: string
   compatibility: string
   inTheBox: string
@@ -51,7 +52,7 @@ export function blankForm(overrides: Partial<ProductFormState> = {}): ProductFor
     short: '',
     description: '',
     status: 'published',
-    images: '',
+    images: [],
     concentration: '',
     volumes: '50ml, 100ml',
     perfumer: '',
@@ -80,7 +81,7 @@ export function productToForm(p: CatalogProduct): ProductFormState {
     short: p.short,
     description: p.description,
     status: p.status,
-    images: (p.images || []).join('\n'),
+    images: [...(p.images || [])],
     concentration: p.concentration || '',
     volumes: (p.volumes || []).join(', '),
     perfumer: p.perfumer || '',
@@ -118,10 +119,7 @@ function parseSpecs(value: string): Record<string, string> {
 }
 
 export function formToPayload(form: ProductFormState) {
-  const images = form.images
-    .split('\n')
-    .map((s) => s.trim())
-    .filter(Boolean)
+  const images = form.images.map((s) => s.trim()).filter(Boolean)
 
   const base = {
     id: form.id.trim(),
@@ -176,6 +174,154 @@ type Props = {
   idEditable?: boolean
 }
 
+function ImageUploader({
+  images,
+  onChange,
+}: {
+  images: string[]
+  onChange: (images: string[]) => void
+}) {
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState('')
+  const [dragOver, setDragOver] = useState(false)
+
+  async function handleFiles(fileList: FileList | File[]) {
+    const files = Array.from(fileList).filter((f) => f.type.startsWith('image/'))
+    if (files.length === 0) {
+      setError('Please choose image files (JPG, PNG, WebP)')
+      return
+    }
+    setUploading(true)
+    setError('')
+    try {
+      const uploaded: string[] = []
+      for (const file of files) {
+        if (file.size > 8 * 1024 * 1024) {
+          throw new Error(`${file.name} is larger than 8MB`)
+        }
+        uploaded.push(await uploadCatalogImage(file))
+      }
+      onChange([...images, ...uploaded])
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Upload failed')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  function removeAt(idx: number) {
+    onChange(images.filter((_, i) => i !== idx))
+  }
+
+  function move(idx: number, dir: -1 | 1) {
+    const next = [...images]
+    const j = idx + dir
+    if (j < 0 || j >= next.length) return
+    ;[next[idx], next[j]] = [next[j], next[idx]]
+    onChange(next)
+  }
+
+  return (
+    <div className="space-y-4">
+      <label
+        onDragOver={(e) => {
+          e.preventDefault()
+          setDragOver(true)
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault()
+          setDragOver(false)
+          if (e.dataTransfer.files?.length) void handleFiles(e.dataTransfer.files)
+        }}
+        className={`flex cursor-pointer flex-col items-center justify-center gap-3 px-4 py-10 hairline transition-colors ${
+          dragOver
+            ? 'border-[#c89b5c] bg-[#c89b5c]/10'
+            : 'bg-[#0a0a0a] hover:border-[#c89b5c]/50'
+        }`}
+      >
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          multiple
+          className="hidden"
+          disabled={uploading}
+          onChange={(e) => {
+            if (e.target.files?.length) void handleFiles(e.target.files)
+            e.target.value = ''
+          }}
+        />
+        {uploading ? (
+          <Upload className="w-6 h-6 text-[#c89b5c] animate-pulse" />
+        ) : (
+          <ImagePlus className="w-6 h-6 text-[#c89b5c]" />
+        )}
+        <div className="text-center">
+          <div className="text-body text-foreground">
+            {uploading ? 'Uploading…' : 'Click to upload or drag & drop'}
+          </div>
+          <div className="text-body-small text-[#707070] mt-1">
+            JPG, PNG, WebP · max 8MB each · first image is primary
+          </div>
+        </div>
+      </label>
+
+      {error && <p className="text-body-small text-[#a85c5c]">{error}</p>}
+
+      {images.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {images.map((src, i) => (
+            <div
+              key={`${src.slice(0, 40)}-${i}`}
+              className="relative aspect-[4/5] bg-[#0a0a0a] hairline overflow-hidden group"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={resolveImageUrl(src)}
+                alt=""
+                className="w-full h-full object-cover"
+              />
+              {i === 0 && (
+                <span className="absolute left-2 top-2 px-2 py-0.5 text-[10px] uppercase tracking-wider bg-[#c89b5c] text-[#0a0a0a]">
+                  Primary
+                </span>
+              )}
+              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-black/75 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => move(i, -1)}
+                    disabled={i === 0}
+                    className="px-2 text-[10px] text-[#a8a8a8] hover:text-[#c89b5c] disabled:opacity-30"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => move(i, 1)}
+                    disabled={i === images.length - 1}
+                    className="px-2 text-[10px] text-[#a8a8a8] hover:text-[#c89b5c] disabled:opacity-30"
+                  >
+                    →
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeAt(i)}
+                  className="p-1 text-[#a85c5c] hover:bg-[#a85c5c]/10"
+                  title="Remove"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
   const set =
     (key: keyof ProductFormState) =>
@@ -184,8 +330,7 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
       setForm((prev) => {
         const next = { ...prev, [key]: value }
         if (key === 'category') {
-          next.subCategory =
-            value === 'tech' ? TECH_SUBS[0] : PARFUM_SUBS[0]
+          next.subCategory = value === 'tech' ? TECH_SUBS[0] : PARFUM_SUBS[0]
         }
         return next
       })
@@ -262,11 +407,7 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
             </select>
           </FormField>
           <FormField label="Sub-category" required>
-            <select
-              className={inputClass}
-              value={form.subCategory}
-              onChange={set('subCategory')}
-            >
+            <select className={inputClass} value={form.subCategory} onChange={set('subCategory')}>
               {subs.map((s) => (
                 <option key={s} value={s}>
                   {s}
@@ -326,16 +467,10 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
 
       <div className="border-t hairline-subtle pt-6">
         <h3 className="text-subheading text-foreground mb-4">Images</h3>
-        <FormField
-          label="Image URLs"
-          hint="One URL per line. First image is the primary card/gallery image."
-        >
-          <textarea
-            className={`${inputClass} resize-none font-mono text-sm`}
-            rows={4}
-            value={form.images}
-            onChange={set('images')}
-            placeholder="https://…/product.jpg"
+        <FormField label="Upload images">
+          <ImageUploader
+            images={form.images}
+            onChange={(images) => setForm((prev) => ({ ...prev, images }))}
           />
         </FormField>
       </div>
@@ -388,11 +523,7 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
               />
             </FormField>
             <FormField label="Compatibility" hint="Comma-separated">
-              <input
-                className={inputClass}
-                value={form.compatibility}
-                onChange={set('compatibility')}
-              />
+              <input className={inputClass} value={form.compatibility} onChange={set('compatibility')} />
             </FormField>
             <FormField label="In the box" hint="Comma-separated">
               <input className={inputClass} value={form.inTheBox} onChange={set('inTheBox')} />

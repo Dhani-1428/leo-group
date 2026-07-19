@@ -10,6 +10,7 @@ import {
   deleteCatalogProduct,
   listCatalogProducts,
   websiteProductUrl,
+  resolveImageUrl,
   API_BASE,
 } from '@/lib/catalog-api'
 import type { CatalogProduct } from '@/lib/catalog-types'
@@ -169,7 +170,7 @@ export default function ProductsPage() {
                           {product.images?.[0] && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
-                              src={product.images[0]}
+                              src={resolveImageUrl(product.images[0])}
                               alt=""
                               className="w-10 h-12 object-cover bg-[#0a0a0a]"
                             />

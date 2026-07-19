@@ -94,6 +94,67 @@ export async function updateCatalogStock(
   return data.product
 }
 
+function fileToCompressedDataUrl(
+  file: File,
+  maxWidth = 1400,
+  quality = 0.85,
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      try {
+        const scale = Math.min(1, maxWidth / img.width)
+        const canvas = document.createElement("canvas")
+        canvas.width = Math.max(1, Math.round(img.width * scale))
+        canvas.height = Math.max(1, Math.round(img.height * scale))
+        const ctx = canvas.getContext("2d")
+        if (!ctx) throw new Error("Canvas not supported")
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+        URL.revokeObjectURL(objectUrl)
+        resolve(canvas.toDataURL("image/jpeg", quality))
+      } catch (e) {
+        URL.revokeObjectURL(objectUrl)
+        reject(e)
+      }
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl)
+      reject(new Error("Could not read image"))
+    }
+    img.src = objectUrl
+  })
+}
+
+/** Upload image to website API; falls back to compressed data URL. */
+export async function uploadCatalogImage(file: File): Promise<string> {
+  try {
+    const body = new FormData()
+    body.append("file", file)
+    const h: Record<string, string> = {}
+    if (ADMIN_KEY) h["X-Admin-Key"] = ADMIN_KEY
+    const res = await fetch(`${API_BASE}/api/upload`, {
+      method: "POST",
+      headers: h,
+      body,
+    })
+    const data = await parse<{ url: string }>(res)
+    // Return absolute URL so Next admin can preview images from the website host
+    if (data.url.startsWith("http") || data.url.startsWith("data:")) return data.url
+    return `${API_BASE}${data.url.startsWith("/") ? "" : "/"}${data.url}`
+  } catch {
+    return fileToCompressedDataUrl(file)
+  }
+}
+
+export function resolveImageUrl(src: string) {
+  if (!src) return src
+  if (src.startsWith("http") || src.startsWith("data:") || src.startsWith("blob:")) {
+    return src
+  }
+  return `${API_BASE}${src.startsWith("/") ? "" : "/"}${src}`
+}
+
 export function websiteProductUrl(id: string) {
   const site =
     process.env.NEXT_PUBLIC_WEBSITE_URL?.replace(/\/$/, "") ||
