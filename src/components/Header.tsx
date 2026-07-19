@@ -65,6 +65,10 @@ export function Header() {
               href={ADMIN_PANEL_URL}
               aria-label="Admin"
               className="hover:text-gold transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.assign(ADMIN_PANEL_URL);
+              }}
             >
               <Settings className="h-4 w-4" />
             </a>
@@ -197,7 +201,11 @@ function MenuOverlay({ onClose }: { onClose: () => void }) {
 
           <a
             href={ADMIN_PANEL_URL}
-            onClick={onClose}
+            onClick={(e) => {
+              e.preventDefault();
+              onClose();
+              window.location.assign(ADMIN_PANEL_URL);
+            }}
             className="block py-3 px-2 font-display text-xl tracking-[0.15em] text-foreground hover:text-gold border-b border-gold/10"
           >
             {t("nav.admin")}

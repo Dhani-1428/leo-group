@@ -1,5 +1,17 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "tanstack-start",
-  "buildCommand": "npm run build"
+  "buildCommand": "npm run build",
+  "redirects": [
+    {
+      "source": "/admin",
+      "destination": "https://maison-aurum-admin-panel.vercel.app",
+      "permanent": false
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "https://maison-aurum-admin-panel.vercel.app",
+      "permanent": false
+    }
+  ]
 }

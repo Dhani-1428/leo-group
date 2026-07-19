@@ -57,6 +57,10 @@ export function Footer() {
             <a
               href={ADMIN_PANEL_URL}
               className="hover:text-gold [.theme-tech_&]:hover:text-blue-600"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.assign(ADMIN_PANEL_URL);
+              }}
             >
               {t("nav.admin")}
             </a>
