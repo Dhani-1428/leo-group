@@ -1,7 +1,7 @@
-import { Link } from "@tanstack/react-router";
 import { Truck, Shield } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useCategory } from "@/lib/categoryContext";
+import { getAdminPanelUrl } from "@/lib/adminPanelUrl";
 
 export function Footer() {
   const { t } = useI18n();
@@ -54,7 +54,14 @@ export function Footer() {
           <div className="flex gap-6">
             <a href="#" className="hover:text-gold [.theme-tech_&]:hover:text-blue-600">{t("footer.privacy")}</a>
             <a href="#" className="hover:text-gold [.theme-tech_&]:hover:text-blue-600">{t("footer.terms")}</a>
-            <Link to="/admin" className="hover:text-gold [.theme-tech_&]:hover:text-blue-600">{t("nav.admin")}</Link>
+            <a
+              href={getAdminPanelUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-gold [.theme-tech_&]:hover:text-blue-600"
+            >
+              {t("nav.admin")}
+            </a>
           </div>
         </div>
       </div>

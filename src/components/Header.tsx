@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useCategory, type Category } from "@/lib/categoryContext";
 import { TECH_SUB_LINKS, PARFUM_SUB_LINKS } from "@/components/CategorySubNav";
+import { getAdminPanelUrl } from "@/lib/adminPanelUrl";
 
 export function Header() {
   const { t, toggle, lang } = useI18n();
@@ -60,7 +61,15 @@ export function Header() {
           <div className="flex items-center justify-end gap-2.5 sm:gap-4 text-foreground/80 shrink-0">
             <button aria-label="Search" className="hover:text-gold transition-colors"><Search className="h-4 w-4" /></button>
             <button aria-label="Wishlist" className="hover:text-gold transition-colors"><Heart className="h-4 w-4" /></button>
-            <Link to="/admin" aria-label="Admin" className="hover:text-gold transition-colors"><Settings className="h-4 w-4" /></Link>
+            <a
+              href={getAdminPanelUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Admin"
+              className="hover:text-gold transition-colors"
+            >
+              <Settings className="h-4 w-4" />
+            </a>
             <button aria-label="Account" className="hover:text-gold transition-colors"><User className="h-4 w-4" /></button>
             <button aria-label="Cart" className="relative hover:text-gold transition-colors">
               <ShoppingBag className="h-4 w-4" />
@@ -188,13 +197,15 @@ function MenuOverlay({ onClose }: { onClose: () => void }) {
             onItemClick={onClose}
           />
 
-          <Link
-            to="/admin"
+          <a
+            href={getAdminPanelUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={onClose}
             className="block py-3 px-2 font-display text-xl tracking-[0.15em] text-foreground hover:text-gold border-b border-gold/10"
           >
             {t("nav.admin")}
-          </Link>
+          </a>
         </nav>
       </motion.aside>
     </>
