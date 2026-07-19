@@ -56,6 +56,52 @@ export async function adminSetStock(id: string, stock: number): Promise<CatalogP
   return data.product;
 }
 
+/** Compress image in the browser (fallback when server upload is unavailable). */
+export function fileToCompressedDataUrl(
+  file: File,
+  maxWidth = 1400,
+  quality = 0.85,
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const scale = Math.min(1, maxWidth / img.width);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(img.width * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Canvas not supported");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(objectUrl);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      } catch (e) {
+        URL.revokeObjectURL(objectUrl);
+        reject(e);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Could not read image"));
+    };
+    img.src = objectUrl;
+  });
+}
+
+/** Upload to server; falls back to compressed data URL if upload fails. */
+export async function adminUploadImage(file: File): Promise<string> {
+  try {
+    const body = new FormData();
+    body.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body });
+    const data = await parse<{ url: string }>(res);
+    return data.url;
+  } catch {
+    return fileToCompressedDataUrl(file);
+  }
+}
+
 export function slugify(name: string) {
   return name
     .toLowerCase()
@@ -99,7 +145,7 @@ export type EditorDraft = {
   short: string;
   description: string;
   status: PublishStatus;
-  imagesText: string;
+  images: string[];
 };
 
 export function productToDraft(p: CatalogProduct): EditorDraft {
@@ -116,7 +162,7 @@ export function productToDraft(p: CatalogProduct): EditorDraft {
     short: p.short,
     description: p.description,
     status: p.status,
-    imagesText: (p.images || []).join("\n"),
+    images: [...(p.images || [])],
   };
 }
 
@@ -134,16 +180,13 @@ export function blankDraft(category: Category = "parfum"): EditorDraft {
     short: "",
     description: "",
     status: "published",
-    imagesText: "",
+    images: [],
   };
 }
 
 export function draftToPayload(d: EditorDraft) {
   const id = d.id.trim() || slugify(d.name);
-  const images = d.imagesText
-    .split("\n")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const images = d.images.map((s) => s.trim()).filter(Boolean);
   return {
     id,
     sku: d.sku.trim() || id.toUpperCase(),

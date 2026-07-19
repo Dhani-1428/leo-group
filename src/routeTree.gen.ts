@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as ApiCatalogRouteImport } from './routes/api/catalog'
 import { Route as ShopCategorySubRouteImport } from './routes/shop.$category.$sub'
+import { Route as ApiUploadsSplatRouteImport } from './routes/api/uploads.$'
 import { Route as ApiCatalogIdRouteImport } from './routes/api/catalog/$id'
 import { Route as ApiCatalogIdStockRouteImport } from './routes/api/catalog/$id.stock'
 
@@ -32,6 +34,11 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUploadRoute = ApiUploadRouteImport.update({
+  id: '/api/upload',
+  path: '/api/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCatalogRoute = ApiCatalogRouteImport.update({
   id: '/api/catalog',
   path: '/api/catalog',
@@ -40,6 +47,11 @@ const ApiCatalogRoute = ApiCatalogRouteImport.update({
 const ShopCategorySubRoute = ShopCategorySubRouteImport.update({
   id: '/shop/$category/$sub',
   path: '/shop/$category/$sub',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUploadsSplatRoute = ApiUploadsSplatRouteImport.update({
+  id: '/api/uploads/$',
+  path: '/api/uploads/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCatalogIdRoute = ApiCatalogIdRouteImport.update({
@@ -57,8 +69,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/api/catalog': typeof ApiCatalogRouteWithChildren
+  '/api/upload': typeof ApiUploadRoute
   '/product/$id': typeof ProductIdRoute
   '/api/catalog/$id': typeof ApiCatalogIdRouteWithChildren
+  '/api/uploads/$': typeof ApiUploadsSplatRoute
   '/shop/$category/$sub': typeof ShopCategorySubRoute
   '/api/catalog/$id/stock': typeof ApiCatalogIdStockRoute
 }
@@ -66,8 +80,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/api/catalog': typeof ApiCatalogRouteWithChildren
+  '/api/upload': typeof ApiUploadRoute
   '/product/$id': typeof ProductIdRoute
   '/api/catalog/$id': typeof ApiCatalogIdRouteWithChildren
+  '/api/uploads/$': typeof ApiUploadsSplatRoute
   '/shop/$category/$sub': typeof ShopCategorySubRoute
   '/api/catalog/$id/stock': typeof ApiCatalogIdStockRoute
 }
@@ -76,8 +92,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/api/catalog': typeof ApiCatalogRouteWithChildren
+  '/api/upload': typeof ApiUploadRoute
   '/product/$id': typeof ProductIdRoute
   '/api/catalog/$id': typeof ApiCatalogIdRouteWithChildren
+  '/api/uploads/$': typeof ApiUploadsSplatRoute
   '/shop/$category/$sub': typeof ShopCategorySubRoute
   '/api/catalog/$id/stock': typeof ApiCatalogIdStockRoute
 }
@@ -87,8 +105,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/api/catalog'
+    | '/api/upload'
     | '/product/$id'
     | '/api/catalog/$id'
+    | '/api/uploads/$'
     | '/shop/$category/$sub'
     | '/api/catalog/$id/stock'
   fileRoutesByTo: FileRoutesByTo
@@ -96,8 +116,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/api/catalog'
+    | '/api/upload'
     | '/product/$id'
     | '/api/catalog/$id'
+    | '/api/uploads/$'
     | '/shop/$category/$sub'
     | '/api/catalog/$id/stock'
   id:
@@ -105,8 +127,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/api/catalog'
+    | '/api/upload'
     | '/product/$id'
     | '/api/catalog/$id'
+    | '/api/uploads/$'
     | '/shop/$category/$sub'
     | '/api/catalog/$id/stock'
   fileRoutesById: FileRoutesById
@@ -115,7 +139,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   ApiCatalogRoute: typeof ApiCatalogRouteWithChildren
+  ApiUploadRoute: typeof ApiUploadRoute
   ProductIdRoute: typeof ProductIdRoute
+  ApiUploadsSplatRoute: typeof ApiUploadsSplatRoute
   ShopCategorySubRoute: typeof ShopCategorySubRoute
 }
 
@@ -142,6 +168,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/upload': {
+      id: '/api/upload'
+      path: '/api/upload'
+      fullPath: '/api/upload'
+      preLoaderRoute: typeof ApiUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/catalog': {
       id: '/api/catalog'
       path: '/api/catalog'
@@ -154,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/shop/$category/$sub'
       fullPath: '/shop/$category/$sub'
       preLoaderRoute: typeof ShopCategorySubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/uploads/$': {
+      id: '/api/uploads/$'
+      path: '/api/uploads/$'
+      fullPath: '/api/uploads/$'
+      preLoaderRoute: typeof ApiUploadsSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/catalog/$id': {
@@ -201,7 +241,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   ApiCatalogRoute: ApiCatalogRouteWithChildren,
+  ApiUploadRoute: ApiUploadRoute,
   ProductIdRoute: ProductIdRoute,
+  ApiUploadsSplatRoute: ApiUploadsSplatRoute,
   ShopCategorySubRoute: ShopCategorySubRoute,
 }
 export const routeTree = rootRouteImport
