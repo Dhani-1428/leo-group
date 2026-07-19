@@ -1,7 +1,7 @@
 import { Truck, Shield } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useCategory } from "@/lib/categoryContext";
-import { getAdminPanelUrl } from "@/lib/adminPanelUrl";
+import { ADMIN_PANEL_URL } from "@/lib/adminPanelUrl";
 
 export function Footer() {
   const { t } = useI18n();
@@ -55,9 +55,7 @@ export function Footer() {
             <a href="#" className="hover:text-gold [.theme-tech_&]:hover:text-blue-600">{t("footer.privacy")}</a>
             <a href="#" className="hover:text-gold [.theme-tech_&]:hover:text-blue-600">{t("footer.terms")}</a>
             <a
-              href={getAdminPanelUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={ADMIN_PANEL_URL}
               className="hover:text-gold [.theme-tech_&]:hover:text-blue-600"
             >
               {t("nav.admin")}

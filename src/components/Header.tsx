@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useCategory, type Category } from "@/lib/categoryContext";
 import { TECH_SUB_LINKS, PARFUM_SUB_LINKS } from "@/components/CategorySubNav";
-import { getAdminPanelUrl } from "@/lib/adminPanelUrl";
+import { ADMIN_PANEL_URL } from "@/lib/adminPanelUrl";
 
 export function Header() {
   const { t, toggle, lang } = useI18n();
@@ -62,9 +62,7 @@ export function Header() {
             <button aria-label="Search" className="hover:text-gold transition-colors"><Search className="h-4 w-4" /></button>
             <button aria-label="Wishlist" className="hover:text-gold transition-colors"><Heart className="h-4 w-4" /></button>
             <a
-              href={getAdminPanelUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={ADMIN_PANEL_URL}
               aria-label="Admin"
               className="hover:text-gold transition-colors"
             >
@@ -198,9 +196,7 @@ function MenuOverlay({ onClose }: { onClose: () => void }) {
           />
 
           <a
-            href={getAdminPanelUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={ADMIN_PANEL_URL}
             onClick={onClose}
             className="block py-3 px-2 font-display text-xl tracking-[0.15em] text-foreground hover:text-gold border-b border-gold/10"
           >
