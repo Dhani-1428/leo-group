@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -142,13 +143,16 @@ function RootComponent() {
 
 function ThemedShell() {
   const { category } = useCategory();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
+
   return (
     <div className={`${category === "tech" ? "theme-tech" : ""} min-h-screen flex flex-col bg-background text-foreground`}>
-      <Header />
+      {!isAdmin && <Header />}
       <main className="flex-1">
         <Outlet />
       </main>
-      <Footer />
+      {!isAdmin && <Footer />}
     </div>
   );
 }
