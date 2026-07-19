@@ -33,12 +33,21 @@ export async function saveUpload(file: File): Promise<{ url: string; filename: s
     throw new Error("Image must be under 8MB");
   }
 
-  await ensureUploadDir();
   const ext = extFor(file.type, file.name);
   const filename = `${Date.now()}-${randomBytes(4).toString("hex")}${ext}`;
   const buf = Buffer.from(await file.arrayBuffer());
-  await fs.writeFile(path.join(UPLOAD_DIR, filename), buf);
-  return { url: `/api/uploads/${filename}`, filename };
+
+  try {
+    await ensureUploadDir();
+    await fs.writeFile(path.join(UPLOAD_DIR, filename), buf);
+    return { url: `/api/uploads/${filename}`, filename };
+  } catch (err) {
+    // Serverless FS may be read-only — return a data URL so admin still works.
+    console.warn("[uploads] disk write failed, returning data URL:", err);
+    const b64 = buf.toString("base64");
+    const mime = file.type || "image/jpeg";
+    return { url: `data:${mime};base64,${b64}`, filename };
+  }
 }
 
 export async function readUpload(filename: string): Promise<{ data: Buffer; contentType: string } | null> {

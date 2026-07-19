@@ -13,10 +13,16 @@ export function allowedOrigins() {
   return [...DEFAULT_ORIGINS, ...extra];
 }
 
+function isAllowedOrigin(origin: string) {
+  if (allowedOrigins().includes(origin)) return true;
+  // Allow deployed Next admin panels on Vercel
+  if (/^https:\/\/[\w.-]+\.vercel\.app$/.test(origin)) return true;
+  return false;
+}
+
 export function corsHeaders(request: Request): HeadersInit {
   const origin = request.headers.get("Origin");
-  const allowed = allowedOrigins();
-  const match = origin && allowed.includes(origin) ? origin : allowed[0];
+  const match = origin && isAllowedOrigin(origin) ? origin : allowedOrigins()[0];
   return {
     "Access-Control-Allow-Origin": match,
     "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",

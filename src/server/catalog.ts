@@ -30,9 +30,14 @@ async function ensureDir() {
 }
 
 export async function saveCatalog(products: CatalogProduct[]) {
-  await ensureDir();
   cache = products;
-  await fs.writeFile(CATALOG_PATH, JSON.stringify(products, null, 2), "utf-8");
+  try {
+    await ensureDir();
+    await fs.writeFile(CATALOG_PATH, JSON.stringify(products, null, 2), "utf-8");
+  } catch (err) {
+    // Vercel serverless has a read-only filesystem; keep in-memory cache.
+    console.warn("[catalog] persistence unavailable, using in-memory catalog:", err);
+  }
 }
 
 export async function listProducts(opts?: {
