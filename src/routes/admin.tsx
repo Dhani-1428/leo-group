@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Plus, Trash2, X, Lock, LogOut, Package, BarChart3, RefreshCw, ExternalLink, Save,
+  Plus, Trash2, X, Lock, LogOut, Package, BarChart3, RefreshCw, ExternalLink, Save, Upload, ImagePlus,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import type { CatalogProduct } from "@/lib/catalogTypes";
@@ -12,6 +12,7 @@ import {
   adminUpdateProduct,
   adminDeleteProduct,
   adminSetStock,
+  adminUploadImage,
   blankDraft,
   productToDraft,
   draftToPayload,
@@ -584,13 +585,10 @@ function ProductEditor({
           </Field>
         </div>
         <div className="mt-4">
-          <Field label="Image URLs (one per line)">
-            <textarea
-              rows={3}
-              className={`${input} font-mono text-xs`}
-              value={draft.imagesText}
-              onChange={(e) => set("imagesText", e.target.value)}
-              placeholder="https://…"
+          <Field label="Product images">
+            <ImageUploader
+              images={draft.images}
+              onChange={(images) => set("images", images)}
             />
           </Field>
         </div>
@@ -614,6 +612,147 @@ function ProductEditor({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ImageUploader({
+  images,
+  onChange,
+}: {
+  images: string[];
+  onChange: (images: string[]) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const [dragOver, setDragOver] = useState(false);
+
+  async function handleFiles(fileList: FileList | File[]) {
+    const files = Array.from(fileList).filter((f) => f.type.startsWith("image/"));
+    if (files.length === 0) {
+      setError("Please choose image files (JPG, PNG, WebP)");
+      return;
+    }
+    setUploading(true);
+    setError("");
+    try {
+      const uploaded: string[] = [];
+      for (const file of files) {
+        if (file.size > 8 * 1024 * 1024) {
+          throw new Error(`${file.name} is larger than 8MB`);
+        }
+        uploaded.push(await adminUploadImage(file));
+      }
+      onChange([...images, ...uploaded]);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function removeAt(idx: number) {
+    onChange(images.filter((_, i) => i !== idx));
+  }
+
+  function move(idx: number, dir: -1 | 1) {
+    const next = [...images];
+    const j = idx + dir;
+    if (j < 0 || j >= next.length) return;
+    [next[idx], next[j]] = [next[j], next[idx]];
+    onChange(next);
+  }
+
+  return (
+    <div className="space-y-4">
+      <label
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          if (e.dataTransfer.files?.length) void handleFiles(e.dataTransfer.files);
+        }}
+        className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-4 py-10 transition-colors ${
+          dragOver
+            ? "border-amber-200 bg-amber-200/10"
+            : "border-white/20 bg-black/30 hover:border-amber-200/50"
+        }`}
+      >
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          multiple
+          className="hidden"
+          disabled={uploading}
+          onChange={(e) => {
+            if (e.target.files?.length) void handleFiles(e.target.files);
+            e.target.value = "";
+          }}
+        />
+        {uploading ? (
+          <Upload className="h-6 w-6 animate-pulse text-amber-200" />
+        ) : (
+          <ImagePlus className="h-6 w-6 text-amber-200" />
+        )}
+        <div className="text-center">
+          <div className="text-sm text-white">
+            {uploading ? "Uploading…" : "Click to upload or drag & drop"}
+          </div>
+          <div className="mt-1 text-[11px] text-white/40">JPG, PNG, WebP · max 8MB each</div>
+        </div>
+      </label>
+
+      {error && <p className="text-xs text-red-400">{error}</p>}
+
+      {images.length > 0 && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {images.map((src, i) => (
+            <div
+              key={`${src.slice(0, 48)}-${i}`}
+              className="group relative aspect-[4/5] overflow-hidden rounded-lg border border-white/10 bg-black/40"
+            >
+              <img src={src} alt="" className="h-full w-full object-cover" />
+              {i === 0 && (
+                <span className="absolute left-2 top-2 rounded bg-amber-200 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-black">
+                  Primary
+                </span>
+              )}
+              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-black/70 p-2 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => move(i, -1)}
+                    className="px-2 text-[10px] text-white/80 hover:text-amber-200"
+                    disabled={i === 0}
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => move(i, 1)}
+                    className="px-2 text-[10px] text-white/80 hover:text-amber-200"
+                    disabled={i === images.length - 1}
+                  >
+                    →
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeAt(i)}
+                  className="rounded p-1 text-red-400 hover:bg-red-400/10"
+                  title="Remove"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
