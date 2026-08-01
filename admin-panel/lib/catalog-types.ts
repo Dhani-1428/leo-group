@@ -14,10 +14,20 @@ export type Review = {
   date: string
 }
 
+export const PERFUME_GENDER_OPTIONS = [
+  { key: "women", label: "Women" },
+  { key: "men", label: "Men" },
+  { key: "unisex", label: "Unisex" },
+] as const
+
+export type PerfumeGender = (typeof PERFUME_GENDER_OPTIONS)[number]["key"]
+
 export type CatalogProduct = {
   id: string
   category: Category
   subCategory?: string
+  /** Multi audience: men / women / unisex — product shows in each selected shop filter */
+  genders?: PerfumeGender[]
   name: string
   line: string
   price: number
@@ -44,10 +54,19 @@ export type CatalogProduct = {
 export const PARFUM_SUBS = [
   "for-her",
   "for-him",
+  "unisex",
   "attars",
   "testers",
   "new-arrivals",
   "limited-edition",
+] as const
+
+export const CONCENTRATION_OPTIONS = [
+  "Eau De Cologne",
+  "Eau De Toilette",
+  "Eau De Parfum",
+  "Pure Parfum",
+  "Extrait de Parfum",
 ] as const
 
 export const TECH_SUBS = [

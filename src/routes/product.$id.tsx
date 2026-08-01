@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import type { Product } from "@/lib/products";
 import { fetchPublicProduct, fetchRelatedProducts } from "@/lib/catalogFns";
+import { useBagStore } from "@/lib/bagStore";
 
 export const Route = createFileRoute("/product/$id")({
   loader: async ({ params }) => {
@@ -426,13 +427,35 @@ function ProductPage() {
 
   const [variant, setVariant] = useState<string>(isParfum ? p.volumes?.[1] ?? "" : "");
   const [qty, setQty] = useState(1);
-  const [wished, setWished] = useState(false);
   const [added, setAdded] = useState(false);
+
+  const addToBag = useBagStore((s) => s.addToBag);
+  const toggleWishlist = useBagStore((s) => s.toggleWishlist);
+  const wished = useBagStore((s) => s.wishlist.some((w) => w.productId === p.id));
 
   const addToCart = () => {
     if (!inStock) return;
+    addToBag({
+      productId: p.id,
+      name: p.name,
+      line: p.line,
+      price: p.price,
+      image: p.images[0],
+      variant: variant || undefined,
+      qty,
+    });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
+  };
+
+  const onWish = () => {
+    toggleWishlist({
+      productId: p.id,
+      name: p.name,
+      line: p.line,
+      price: p.price,
+      image: p.images[0],
+    });
   };
 
   return (
@@ -555,7 +578,7 @@ function ProductPage() {
                   <span className="absolute inset-0 shimmer" />
                 </button>
                 <button
-                  onClick={() => setWished((w) => !w)}
+                  onClick={onWish}
                   data-cursor
                   className={`grid w-14 place-items-center rounded-full border transition-all ${
                     wished ? "border-gold bg-gold/10 text-gold" : "border-gold/25 hover:border-gold/50"
@@ -565,6 +588,7 @@ function ProductPage() {
                 </button>
               </div>
               <button
+                onClick={addToCart}
                 disabled={!inStock}
                 data-cursor
                 className="rounded-full border border-gold/30 py-5 text-xs font-medium tracking-[0.3em] text-foreground hover:bg-gold/5 disabled:cursor-not-allowed disabled:opacity-40"

@@ -20,6 +20,8 @@ import { useI18n } from "@/lib/i18n";
 import type { Product, TechSubCategory, ParfumSubCategory } from "@/lib/products";
 import { fetchPublicCatalog } from "@/lib/catalogFns";
 import { TechSubNav as SharedTechSubNav, PerfumeSubNav as SharedPerfumeSubNav } from "@/components/CategorySubNav";
+import { useBagStore } from "@/lib/bagStore";
+import { matchesParfumSub } from "@/lib/parfumFilters";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
@@ -62,6 +64,7 @@ const PARFUM_SUB_ITEMS: { key: ParfumSubCategory | "all"; tk: string }[] = [
   { key: "all", tk: "parfum.sub.all" },
   { key: "for-her", tk: "parfum.sub.forher" },
   { key: "for-him", tk: "parfum.sub.forhim" },
+  { key: "unisex", tk: "parfum.sub.unisex" },
   { key: "attars", tk: "parfum.sub.attars" },
   { key: "testers", tk: "parfum.sub.testers" },
   { key: "new-arrivals", tk: "parfum.sub.new" },
@@ -590,12 +593,13 @@ function BestSellers({
 }) {
   const { t } = useI18n();
   const { products } = Route.useLoaderData();
+  const addToBag = useBagStore((s) => s.addToBag);
   const all = products.filter((p) => p.category === category);
   const list: Product[] =
     category === "tech" && techFilter !== "all"
       ? all.filter((p) => p.subCategory === techFilter)
       : category === "parfum" && parfumFilter !== "all"
-      ? all.filter((p) => p.subCategory === parfumFilter)
+      ? all.filter((p) => matchesParfumSub(p, parfumFilter))
       : all;
   return (
     <section id="collection" className="relative bg-obsidian-2 py-32">
@@ -683,13 +687,33 @@ function BestSellers({
                     <div className="absolute inset-0 bg-gradient-to-t from-obsidian/85 via-obsidian/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                     <div className="absolute inset-x-3 bottom-3 flex flex-col gap-2 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
                       <button
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          addToBag({
+                            productId: p.id,
+                            name: p.name,
+                            line: p.line,
+                            price: p.price,
+                            image: p.images[0],
+                          });
+                        }}
                         className="w-full rounded-full bg-gold-gradient py-2.5 text-[10px] font-semibold tracking-[0.3em] text-obsidian hover:brightness-110"
                       >
                         {t("card.addcart")}
                       </button>
                       <button
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          addToBag({
+                            productId: p.id,
+                            name: p.name,
+                            line: p.line,
+                            price: p.price,
+                            image: p.images[0],
+                          });
+                        }}
                         className="w-full rounded-full border border-gold/60 bg-obsidian/70 py-2.5 text-[10px] font-semibold tracking-[0.3em] text-gold backdrop-blur hover:bg-gold hover:text-obsidian transition-colors"
                       >
                         {t("card.buynow")}

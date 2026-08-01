@@ -6,12 +6,28 @@ import { useI18n } from "@/lib/i18n";
 import { useCategory, type Category } from "@/lib/categoryContext";
 import { TECH_SUB_LINKS, PARFUM_SUB_LINKS } from "@/components/CategorySubNav";
 import { ADMIN_PANEL_URL } from "@/lib/adminPanelUrl";
+import { useBagStore } from "@/lib/bagStore";
+import {
+  AccountPanel,
+  CartPanel,
+  SearchPanel,
+  WishlistPanel,
+  type Panel,
+} from "@/components/HeaderPanels";
 
 export function Header() {
-  const { t, toggle, lang } = useI18n();
+  const { toggle, lang } = useI18n();
   const { category, setCategory } = useCategory();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [panel, setPanel] = useState<Panel>(null);
+  const [hydrated, setHydrated] = useState(false);
+  const bagCount = useBagStore((s) => s.items.reduce((n, i) => n + i.qty, 0));
+  const wishCount = useBagStore((s) => s.wishlist.length);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);
@@ -19,6 +35,11 @@ export function Header() {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const openPanel = (p: Panel) => {
+    setOpen(false);
+    setPanel(p);
+  };
 
   return (
     <>
@@ -59,8 +80,27 @@ export function Header() {
 
           {/* RIGHT — icons always visible */}
           <div className="flex items-center justify-end gap-2.5 sm:gap-4 text-foreground/80 shrink-0">
-            <button aria-label="Search" className="hover:text-gold transition-colors"><Search className="h-4 w-4" /></button>
-            <button aria-label="Wishlist" className="hover:text-gold transition-colors"><Heart className="h-4 w-4" /></button>
+            <button
+              type="button"
+              aria-label="Search"
+              onClick={() => openPanel("search")}
+              className="hover:text-gold transition-colors"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              aria-label="Wishlist"
+              onClick={() => openPanel("wishlist")}
+              className="relative hover:text-gold transition-colors"
+            >
+              <Heart className="h-4 w-4" />
+              {hydrated && wishCount > 0 && (
+                <span className="absolute -right-2 -top-2 grid h-4 min-w-4 place-items-center rounded-full bg-gold-gradient px-0.5 text-[9px] font-semibold text-obsidian">
+                  {wishCount > 9 ? "9+" : wishCount}
+                </span>
+              )}
+            </button>
             <a
               href={ADMIN_PANEL_URL}
               aria-label="Admin"
@@ -72,10 +112,26 @@ export function Header() {
             >
               <Settings className="h-4 w-4" />
             </a>
-            <button aria-label="Account" className="hover:text-gold transition-colors"><User className="h-4 w-4" /></button>
-            <button aria-label="Cart" className="relative hover:text-gold transition-colors">
+            <button
+              type="button"
+              aria-label="Account"
+              onClick={() => openPanel("account")}
+              className="hover:text-gold transition-colors"
+            >
+              <User className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              aria-label="Cart"
+              onClick={() => openPanel("cart")}
+              className="relative hover:text-gold transition-colors"
+            >
               <ShoppingBag className="h-4 w-4" />
-              <span className="absolute -right-2 -top-2 grid h-4 w-4 place-items-center rounded-full bg-gold-gradient text-[9px] font-semibold text-obsidian">2</span>
+              {hydrated && bagCount > 0 && (
+                <span className="absolute -right-2 -top-2 grid h-4 min-w-4 place-items-center rounded-full bg-gold-gradient px-0.5 text-[9px] font-semibold text-obsidian">
+                  {bagCount > 9 ? "9+" : bagCount}
+                </span>
+              )}
             </button>
             <button
               onClick={toggle}
@@ -93,6 +149,11 @@ export function Header() {
       <AnimatePresence>
         {open && <MenuOverlay onClose={() => setOpen(false)} />}
       </AnimatePresence>
+
+      <SearchPanel open={panel === "search"} onClose={() => setPanel(null)} />
+      <WishlistPanel open={panel === "wishlist"} onClose={() => setPanel(null)} />
+      <AccountPanel open={panel === "account"} onClose={() => setPanel(null)} />
+      <CartPanel open={panel === "cart"} onClose={() => setPanel(null)} />
     </>
   );
 }

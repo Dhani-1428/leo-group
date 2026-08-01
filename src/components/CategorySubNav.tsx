@@ -20,6 +20,7 @@ const PARFUM_ITEMS: { key: ParfumSubCategory | "all"; tk: string }[] = [
   { key: "all", tk: "parfum.sub.all" },
   { key: "for-her", tk: "parfum.sub.forher" },
   { key: "for-him", tk: "parfum.sub.forhim" },
+  { key: "unisex", tk: "parfum.sub.unisex" },
   { key: "attars", tk: "parfum.sub.attars" },
   { key: "testers", tk: "parfum.sub.testers" },
   { key: "new-arrivals", tk: "parfum.sub.new" },

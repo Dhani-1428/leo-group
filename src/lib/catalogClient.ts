@@ -113,6 +113,7 @@ export function slugify(name: string) {
 export const PARFUM_SUBS = [
   "for-her",
   "for-him",
+  "unisex",
   "attars",
   "testers",
   "new-arrivals",

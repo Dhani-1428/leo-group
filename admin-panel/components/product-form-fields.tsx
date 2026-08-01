@@ -4,10 +4,13 @@ import { useState } from 'react'
 import { FormField } from '@/components/form-field'
 import { ImagePlus, Trash2, Upload } from 'lucide-react'
 import {
+  CONCENTRATION_OPTIONS,
   PARFUM_SUBS,
+  PERFUME_GENDER_OPTIONS,
   TECH_SUBS,
   type CatalogProduct,
   type Category,
+  type PerfumeGender,
   type PublishStatus,
 } from '@/lib/catalog-types'
 import { resolveImageUrl, uploadCatalogImage } from '@/lib/catalog-api'
@@ -18,6 +21,7 @@ export type ProductFormState = {
   sku: string
   category: Category
   subCategory: string
+  genders: PerfumeGender[]
   line: string
   price: string
   stock: string
@@ -38,6 +42,14 @@ export type ProductFormState = {
   inTheBox: string
 }
 
+function gendersFromProduct(p: CatalogProduct): PerfumeGender[] {
+  if (p.genders && p.genders.length > 0) return [...p.genders]
+  if (p.subCategory === 'for-her') return ['women']
+  if (p.subCategory === 'for-him') return ['men']
+  if (p.subCategory === 'unisex') return ['unisex']
+  return []
+}
+
 export function blankForm(overrides: Partial<ProductFormState> = {}): ProductFormState {
   return {
     id: '',
@@ -45,6 +57,7 @@ export function blankForm(overrides: Partial<ProductFormState> = {}): ProductFor
     sku: '',
     category: 'parfum',
     subCategory: 'for-her',
+    genders: ['women'],
     line: '',
     price: '',
     stock: '25',
@@ -74,6 +87,7 @@ export function productToForm(p: CatalogProduct): ProductFormState {
     sku: p.sku,
     category: p.category,
     subCategory: p.subCategory || (p.category === 'tech' ? 'chargers' : 'for-her'),
+    genders: gendersFromProduct(p),
     line: p.line,
     price: String(p.price),
     stock: String(p.stock),
@@ -145,6 +159,7 @@ export function formToPayload(form: ProductFormState) {
   if (form.category === 'parfum') {
     return {
       ...base,
+      genders: form.genders,
       concentration: form.concentration || undefined,
       volumes: splitList(form.volumes),
       perfumer: form.perfumer || undefined,
@@ -159,6 +174,7 @@ export function formToPayload(form: ProductFormState) {
 
   return {
     ...base,
+    genders: undefined,
     specs: parseSpecs(form.specs),
     compatibility: splitList(form.compatibility),
     inTheBox: splitList(form.inTheBox),
@@ -331,10 +347,21 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
         const next = { ...prev, [key]: value }
         if (key === 'category') {
           next.subCategory = value === 'tech' ? TECH_SUBS[0] : PARFUM_SUBS[0]
+          next.genders = value === 'parfum' ? ['women'] : []
         }
         return next
       })
     }
+
+  const toggleGender = (g: PerfumeGender) => {
+    setForm((prev) => {
+      const has = prev.genders.includes(g)
+      const genders = has ? prev.genders.filter((x) => x !== g) : [...prev.genders, g]
+      // Keep at least one selected when editing perfume
+      if (genders.length === 0) return prev
+      return { ...prev, genders }
+    })
+  }
 
   const subs = form.category === 'tech' ? TECH_SUBS : PARFUM_SUBS
 
@@ -415,6 +442,32 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
               ))}
             </select>
           </FormField>
+          {form.category === 'parfum' && (
+            <FormField
+              label="Audience"
+              hint="Click one or more. Product appears in each selected shop filter (e.g. Men + Unisex)."
+            >
+              <div className="flex flex-wrap gap-2">
+                {PERFUME_GENDER_OPTIONS.map((opt) => {
+                  const active = form.genders.includes(opt.key)
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => toggleGender(opt.key)}
+                      className={`px-4 py-2.5 text-sm tracking-wide transition-colors border ${
+                        active
+                          ? 'border-[#c89b5c] bg-[#c89b5c]/15 text-[#c89b5c]'
+                          : 'border-[#333] text-[#a8a8a8] hover:border-[#c89b5c]/50 hover:text-[#c89b5c]'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </FormField>
+          )}
           <FormField label="Line / Collection" required>
             <input
               className={inputClass}
@@ -481,7 +534,18 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <FormField label="Concentration">
-                <input className={inputClass} value={form.concentration} onChange={set('concentration')} />
+                <select className={inputClass} value={form.concentration} onChange={set('concentration')}>
+                  <option value="">Select concentration</option>
+                  {CONCENTRATION_OPTIONS.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                  {form.concentration &&
+                    !(CONCENTRATION_OPTIONS as readonly string[]).includes(form.concentration) && (
+                      <option value={form.concentration}>{form.concentration}</option>
+                    )}
+                </select>
               </FormField>
               <FormField label="Perfumer">
                 <input className={inputClass} value={form.perfumer} onChange={set('perfumer')} />

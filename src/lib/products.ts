@@ -20,10 +20,20 @@ export type Category = "parfum" | "tech";
 export type ParfumSubCategory =
   | "for-her"
   | "for-him"
+  | "unisex"
   | "attars"
   | "testers"
   | "new-arrivals"
   | "limited-edition";
+
+/** Audience tags — a perfume can belong to more than one (e.g. men + unisex). */
+export type PerfumeGender = "men" | "women" | "unisex";
+
+export const PERFUME_GENDERS: { key: PerfumeGender; label: string; sub: ParfumSubCategory }[] = [
+  { key: "women", label: "Women", sub: "for-her" },
+  { key: "men", label: "Men", sub: "for-him" },
+  { key: "unisex", label: "Unisex", sub: "unisex" },
+];
 
 /** Tech sub-category slugs powering the tech sub-navbar + filter pills. */
 export type TechSubCategory =
@@ -47,6 +57,8 @@ export type Product = {
   id: string;
   category: Category;
   subCategory?: TechSubCategory | ParfumSubCategory;
+  /** Multi audience tags for perfume (Men / Women / Unisex). Product appears in each selected filter. */
+  genders?: PerfumeGender[];
 
   name: string;
   line: string;
@@ -112,7 +124,7 @@ function tech(
 export const products: Product[] = [
   // -------- Parfum --------
   {
-    id: "oud-imperial", category: "parfum", subCategory: "for-him", name: "Oud Imperial", line: "Maison Noir",
+    id: "oud-imperial", category: "parfum", subCategory: "for-him", genders: ["men"], name: "Oud Imperial", line: "Maison Noir",
     price: 480, tag: "Iconic", images: [p3, perfumeHero, p1, p2],
     short: "A smoked oud rendered in liquid amber. The signature of the house.",
     description: "Composed over eighteen months in our Grasse atelier, Oud Imperial pairs Laotian oud with smoked papyrus and Damask rose absolute over dry, resinous benzoin.",
@@ -123,7 +135,7 @@ export const products: Product[] = [
     rating: 4.9, reviews: baseReviews,
   },
   {
-    id: "velours-dambre", category: "parfum", subCategory: "new-arrivals", name: "Velours d'Ambre", line: "Édition Privée",
+    id: "velours-dambre", category: "parfum", subCategory: "new-arrivals", genders: ["women", "unisex"], name: "Velours d'Ambre", line: "Édition Privée",
     price: 320, tag: "New", images: [p1, p2, p3, perfumeHero],
     short: "Velvet amber, vanilla orchid and a hush of leather.",
     description: "Mandarin and pink berry open, vanilla orchid and tonka settle, amber suede and white sandalwood close.",
@@ -133,7 +145,7 @@ export const products: Product[] = [
     rating: 4.8, reviews: baseReviews,
   },
   {
-    id: "nuit-cristalline", category: "parfum", subCategory: "limited-edition", name: "Nuit Cristalline", line: "Haute Perfumery",
+    id: "nuit-cristalline", category: "parfum", subCategory: "limited-edition", genders: ["women", "unisex"], name: "Nuit Cristalline", line: "Haute Perfumery",
     price: 540, tag: "Limited", images: [p2, p1, p3, perfumeHero],
     short: "Cold iris, frozen violet, a single drop of incense.",
     description: "Limited edition of 1200 numbered flacons built around cold iris, dewed violet and Somalian incense.",
@@ -143,7 +155,7 @@ export const products: Product[] = [
     rating: 5.0, reviews: baseReviews,
   },
   {
-    id: "rose-obscure", category: "parfum", subCategory: "for-her", name: "Rose Obscure", line: "Maison Noir",
+    id: "rose-obscure", category: "parfum", subCategory: "for-her", genders: ["women"], name: "Rose Obscure", line: "Maison Noir",
     price: 290, tag: "Bestseller", images: [p1, p3, p2, perfumeHero],
     short: "Black rose, blood orange and a smoked vanilla base.",
     description: "Blood orange and pink pepper open onto smoked Turkish rose, settled in dark vanilla and oud wood.",
@@ -153,7 +165,7 @@ export const products: Product[] = [
     rating: 4.7, reviews: baseReviews,
   },
   {
-    id: "attar-al-noor", category: "parfum", subCategory: "attars", name: "Attar Al Noor", line: "Attars Rares",
+    id: "attar-al-noor", category: "parfum", subCategory: "attars", genders: ["unisex"], name: "Attar Al Noor", line: "Attars Rares",
     price: 220, tag: "Attar", images: [p2, p3, p1, perfumeHero],
     short: "Pure oil attar of white oud, saffron and Taif rose.",
     description: "A traditional alcohol-free attar aged in sandalwood casks. Warm, resinous and intimate on the skin.",
@@ -163,7 +175,7 @@ export const products: Product[] = [
     rating: 4.9, reviews: baseReviews,
   },
   {
-    id: "attar-oud-royal", category: "parfum", subCategory: "attars", name: "Oud Royal Attar", line: "Attars Rares",
+    id: "attar-oud-royal", category: "parfum", subCategory: "attars", genders: ["men", "unisex"], name: "Oud Royal Attar", line: "Attars Rares",
     price: 260, tag: "Attar", images: [p3, p2, p1, perfumeHero],
     short: "Aged Hindi oud attar with musk and amber.",
     description: "Aged Hindi oud pressed into a sandalwood carrier oil — dense, animalic and long-wearing.",
@@ -173,7 +185,7 @@ export const products: Product[] = [
     rating: 4.9, reviews: baseReviews,
   },
   {
-    id: "discovery-tester-set", category: "parfum", subCategory: "testers", name: "Discovery Tester Set", line: "Testers",
+    id: "discovery-tester-set", category: "parfum", subCategory: "testers", genders: ["unisex"], name: "Discovery Tester Set", line: "Testers",
     price: 60, tag: "Tester", images: [p1, p2, p3, perfumeHero],
     short: "Six 2ml testers to explore the maison.",
     description: "Sample vials of six signature extraits presented in a linen-wrapped box — the ideal introduction to the house.",
@@ -182,7 +194,7 @@ export const products: Product[] = [
     rating: 4.8, reviews: baseReviews,
   },
   {
-    id: "monsieur-bois-tester", category: "parfum", subCategory: "testers", name: "Monsieur Bois Tester", line: "Testers",
+    id: "monsieur-bois-tester", category: "parfum", subCategory: "testers", genders: ["men"], name: "Monsieur Bois Tester", line: "Testers",
     price: 25, tag: "Tester", images: [p3, p1, p2, perfumeHero],
     short: "A 5ml travel tester of our woody signature.",
     description: "A travel-format tester of the Monsieur Bois extrait — cedar, vetiver and smoked leather.",
@@ -191,7 +203,7 @@ export const products: Product[] = [
     rating: 4.7, reviews: baseReviews,
   },
   {
-    id: "aurora-fleur", category: "parfum", subCategory: "for-her", name: "Aurora Fleur", line: "Édition Florale",
+    id: "aurora-fleur", category: "parfum", subCategory: "for-her", genders: ["women"], name: "Aurora Fleur", line: "Édition Florale",
     price: 260, tag: "New", images: [p2, p1, p3, perfumeHero],
     short: "Peony, lychee and white musk — luminous and modern.",
     description: "A luminous floral for daylight — dewy peony, ripe lychee and airy white musk.",
@@ -201,7 +213,7 @@ export const products: Product[] = [
     rating: 4.8, reviews: baseReviews,
   },
   {
-    id: "monsieur-bois", category: "parfum", subCategory: "for-him", name: "Monsieur Bois", line: "Maison Noir",
+    id: "monsieur-bois", category: "parfum", subCategory: "for-him", genders: ["men"], name: "Monsieur Bois", line: "Maison Noir",
     price: 340, tag: "Bestseller", images: [p3, p1, p2, perfumeHero],
     short: "Cedar, vetiver and smoked leather — a woody signature.",
     description: "A masculine woody built on Virginia cedar, Haitian vetiver and smoked leather accord.",
