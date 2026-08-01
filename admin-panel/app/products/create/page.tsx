@@ -5,22 +5,11 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LayoutWrapper } from '@/components/layout-wrapper'
 import { Header } from '@/components/header'
-import { ChevronLeft, Save } from 'lucide-react'
-import {
-  ProductFormFields,
-  blankForm,
-  formToPayload,
-  type ProductFormState,
-} from '@/components/product-form-fields'
-import { createCatalogProduct } from '@/lib/catalog-api'
-import { slugify } from '@/lib/catalog-types'
+import { ChevronLeft, Sparkles, Cpu } from 'lucide-react'
 
-export default function ProductCreatePage() {
+export default function CreateProductChooserPage() {
   const router = useRouter()
   const [isAuthed, setIsAuthed] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [form, setForm] = useState<ProductFormState>(blankForm())
 
   useEffect(() => {
     const session = localStorage.getItem('adminSession')
@@ -30,66 +19,51 @@ export default function ProductCreatePage() {
 
   if (!isAuthed) return null
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSaving(true)
-    setError('')
-    try {
-      const withIds = {
-        ...form,
-        id: form.id.trim() || slugify(form.name),
-        sku: form.sku.trim() || slugify(form.name).toUpperCase(),
-      }
-      const payload = formToPayload(withIds)
-      if (!payload.id) throw new Error('Product id is required')
-      await createCatalogProduct(payload)
-      router.push('/products')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed')
-      setIsSaving(false)
-    }
-  }
-
   return (
     <LayoutWrapper>
       <Header
-        title="Create Product"
-        subtitle="Add a product — it will appear on the live website when published"
+        title="Add Product"
+        subtitle="Choose perfume or tech — each opens its own dedicated form"
       />
 
       <div className="p-8">
-        <form onSubmit={handleSubmit} className="max-w-2xl">
-          <div className="bg-[#1a1a1a] hairline p-8 space-y-6">
-            {error && (
-              <div className="px-4 py-3 bg-[#a85c5c]/15 text-[#a85c5c] text-body-small">
-                {error}
-              </div>
-            )}
+        <Link
+          href="/products"
+          className="mb-8 inline-flex items-center gap-2 text-sm text-[#a8a8a8] hover:text-[#c89b5c]"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Back to products
+        </Link>
 
-            <ProductFormFields form={form} setForm={setForm} idEditable />
+        <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
+          <Link
+            href="/products/create/perfume"
+            className="group block border border-[#333] bg-[#1a1a1a] p-8 transition-colors hover:border-[#c89b5c]"
+          >
+            <Sparkles className="mb-4 h-8 w-8 text-[#c89b5c]" />
+            <h2 className="text-xl tracking-wide text-foreground group-hover:text-[#c89b5c]">
+              Add Perfume
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-[#a8a8a8]">
+              LEO SIGNATURE form — concentration, fragrance notes, volumes, perfumer, and
+              multi sub-categories (Men / Women / Unisex…).
+            </p>
+          </Link>
 
-            <div className="border-t hairline-subtle pt-6 flex items-center justify-between">
-              <Link href="/products">
-                <button
-                  type="button"
-                  className="flex items-center gap-2 px-4 py-3 text-foreground hover:bg-[#2a2a2a] rounded-none transition-colors"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Cancel
-                </button>
-              </Link>
-
-              <button
-                type="submit"
-                disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-3 bg-[#c89b5c] text-[#0a0a0a] font-medium rounded-none hover:bg-[#e8c989] transition-colors disabled:opacity-50"
-              >
-                <Save className="w-4 h-4" />
-                {isSaving ? 'Saving…' : 'Create Product'}
-              </button>
-            </div>
-          </div>
-        </form>
+          <Link
+            href="/products/create/tech"
+            className="group block border border-[#333] bg-[#1a1a1a] p-8 transition-colors hover:border-[#c89b5c]"
+          >
+            <Cpu className="mb-4 h-8 w-8 text-[#c89b5c]" />
+            <h2 className="text-xl tracking-wide text-foreground group-hover:text-[#c89b5c]">
+              Add Tech
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-[#a8a8a8]">
+              LEO TECH HUB form — chargers, audio, specs, compatibility, and what&apos;s in
+              the box.
+            </p>
+          </Link>
+        </div>
       </div>
     </LayoutWrapper>
   )

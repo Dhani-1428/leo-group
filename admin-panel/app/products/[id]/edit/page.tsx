@@ -104,7 +104,12 @@ export default function ProductEditPage() {
                 </div>
               )}
 
-              <ProductFormFields form={form} setForm={setForm} idEditable={false} />
+              <ProductFormFields
+                form={form}
+                setForm={setForm}
+                idEditable={false}
+                lockedCategory={form.category}
+              />
 
               <div className="border-t hairline-subtle pt-6 flex items-center justify-between">
                 <Link href="/products">

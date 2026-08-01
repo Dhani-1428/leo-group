@@ -220,6 +220,8 @@ type Props = {
   form: ProductFormState
   setForm: React.Dispatch<React.SetStateAction<ProductFormState>>
   idEditable?: boolean
+  /** When set, category is locked and the category dropdown is hidden. */
+  lockedCategory?: Category
 }
 
 function ImageUploader({
@@ -370,14 +372,19 @@ function ImageUploader({
   )
 }
 
-export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
+export function ProductFormFields({
+  form,
+  setForm,
+  idEditable = true,
+  lockedCategory,
+}: Props) {
   const set =
     (key: keyof ProductFormState) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       const value = e.target.value
       setForm((prev) => {
         const next = { ...prev, [key]: value }
-        if (key === 'category') {
+        if (key === 'category' && !lockedCategory) {
           if (value === 'tech') {
             next.subCategory = TECH_SUBS[0]
             next.subCategories = []
@@ -407,6 +414,8 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
       }
     })
   }
+
+  const isParfum = form.category === 'parfum'
 
   return (
     <div className="space-y-6">
@@ -470,14 +479,16 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
       <div className="border-t hairline-subtle pt-6">
         <h3 className="text-subheading text-foreground mb-4">Classification</h3>
         <div className="grid grid-cols-2 gap-4">
-          <FormField label="Category" required>
-            <select className={inputClass} value={form.category} onChange={set('category')}>
-              <option value="parfum">Parfum (LEO SIGNATURE)</option>
-              <option value="tech">Tech Hub (LEO TECH)</option>
-            </select>
-          </FormField>
+          {!lockedCategory && (
+            <FormField label="Category" required>
+              <select className={inputClass} value={form.category} onChange={set('category')}>
+                <option value="parfum">Parfum (LEO SIGNATURE)</option>
+                <option value="tech">Tech Hub (LEO TECH)</option>
+              </select>
+            </FormField>
+          )}
 
-          {form.category === 'parfum' ? (
+          {isParfum ? (
             <FormField
               label="Sub-category"
               required
@@ -521,7 +532,7 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
               value={form.line}
               onChange={set('line')}
               required
-              placeholder="Maison Noir / Audio"
+              placeholder={isParfum ? 'Maison Noir' : 'Audio / Charging'}
             />
           </FormField>
           <FormField label="Tag / Badge">
@@ -575,7 +586,7 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
         </FormField>
       </div>
 
-      {form.category === 'parfum' ? (
+      {isParfum ? (
         <div className="border-t hairline-subtle pt-6">
           <h3 className="text-subheading text-foreground mb-4">Perfume details</h3>
           <div className="space-y-4">

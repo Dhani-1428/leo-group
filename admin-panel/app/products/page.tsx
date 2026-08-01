@@ -89,11 +89,18 @@ export default function ProductsPage() {
               Refresh
             </button>
             <Link
-              href="/products/create"
+              href="/products/create/perfume"
               className="flex items-center gap-2 px-4 py-2.5 bg-[#c89b5c] text-[#0a0a0a] font-medium rounded-none hover:bg-[#e8c989] transition-colors"
             >
               <Plus className="w-4 h-4" />
-              New Product
+              Add Perfume
+            </Link>
+            <Link
+              href="/products/create/tech"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#1a1a1a] hairline text-foreground rounded-none hover:bg-[#2a2a2a] transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Add Tech
             </Link>
           </div>
         }
