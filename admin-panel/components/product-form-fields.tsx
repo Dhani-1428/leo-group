@@ -576,16 +576,6 @@ export function ProductFormFields({
         </div>
       </div>
 
-      <div className="border-t hairline-subtle pt-6">
-        <h3 className="text-subheading text-foreground mb-4">Images</h3>
-        <FormField label="Upload images">
-          <ImageUploader
-            images={form.images}
-            onChange={(images) => setForm((prev) => ({ ...prev, images }))}
-          />
-        </FormField>
-      </div>
-
       {isParfum ? (
         <div className="border-t hairline-subtle pt-6">
           <h3 className="text-subheading text-foreground mb-4">Perfume details</h3>
@@ -655,6 +645,16 @@ export function ProductFormFields({
           </div>
         </div>
       )}
+
+      <div className="border-t hairline-subtle pt-6">
+        <h3 className="text-subheading text-foreground mb-4">Images</h3>
+        <FormField label="Upload images">
+          <ImageUploader
+            images={form.images}
+            onChange={(images) => setForm((prev) => ({ ...prev, images }))}
+          />
+        </FormField>
+      </div>
 
       <div className="border-t hairline-subtle pt-6">
         <h3 className="text-subheading text-foreground mb-4">Publishing</h3>
