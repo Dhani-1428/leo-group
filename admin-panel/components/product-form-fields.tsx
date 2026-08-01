@@ -222,6 +222,10 @@ type Props = {
   idEditable?: boolean
   /** When set, category is locked and the category dropdown is hidden. */
   lockedCategory?: Category
+  /** Saved perfume brands for autocomplete (from catalog + local history). */
+  brandSuggestions?: string[]
+  /** Saved perfume names for autocomplete. */
+  nameSuggestions?: string[]
 }
 
 function ImageUploader({
@@ -377,6 +381,8 @@ export function ProductFormFields({
   setForm,
   idEditable = true,
   lockedCategory,
+  brandSuggestions = [],
+  nameSuggestions = [],
 }: Props) {
   const set =
     (key: keyof ProductFormState) =>
@@ -416,21 +422,88 @@ export function ProductFormFields({
   }
 
   const isParfum = form.category === 'parfum'
+  const brandListId = 'perfume-brand-suggestions'
+  const nameListId = 'perfume-name-suggestions'
+
+  const filteredNames = nameSuggestions.filter((n) => {
+    if (!form.line.trim()) return true
+    // Prefer names that were used with similar brands when possible — show all matching typed text
+    const q = form.name.trim().toLowerCase()
+    return !q || n.toLowerCase().includes(q)
+  })
 
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-subheading text-foreground mb-4">Basic Information</h3>
+        <h3 className="text-subheading text-foreground mb-4">
+          {isParfum ? 'Perfume' : 'Basic Information'}
+        </h3>
         <div className="space-y-4">
-          <FormField label="Product Name" required>
-            <input
-              className={inputClass}
-              value={form.name}
-              onChange={set('name')}
-              required
-              placeholder="e.g. Oud Imperial"
-            />
-          </FormField>
+          {isParfum ? (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormField
+                label="Perfume Brand"
+                required
+                hint="Type or pick a saved brand — brands you add are remembered."
+              >
+                <input
+                  className={inputClass}
+                  list={brandListId}
+                  value={form.line}
+                  onChange={set('line')}
+                  required
+                  placeholder="e.g. Maison Noir, Creed, Dior…"
+                  autoComplete="off"
+                />
+                <datalist id={brandListId}>
+                  {brandSuggestions.map((b) => (
+                    <option key={b} value={b} />
+                  ))}
+                </datalist>
+              </FormField>
+              <FormField
+                label="Perfume Name"
+                required
+                hint="Type or pick from previously saved perfume names."
+              >
+                <input
+                  className={inputClass}
+                  list={nameListId}
+                  value={form.name}
+                  onChange={set('name')}
+                  required
+                  placeholder="e.g. Oud Imperial"
+                  autoComplete="off"
+                />
+                <datalist id={nameListId}>
+                  {filteredNames.map((n) => (
+                    <option key={n} value={n} />
+                  ))}
+                </datalist>
+              </FormField>
+            </div>
+          ) : (
+            <>
+              <FormField label="Product Name" required>
+                <input
+                  className={inputClass}
+                  value={form.name}
+                  onChange={set('name')}
+                  required
+                  placeholder="e.g. N40 Charger"
+                />
+              </FormField>
+              <FormField label="Line / Collection" required>
+                <input
+                  className={inputClass}
+                  value={form.line}
+                  onChange={set('line')}
+                  required
+                  placeholder="Audio / Charging"
+                />
+              </FormField>
+            </>
+          )}
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             <FormField label="ID / Slug" required hint="Used in website URL /product/{id}">
@@ -533,16 +606,6 @@ export function ProductFormFields({
               </select>
             </FormField>
           )}
-
-          <FormField label="Line / Collection" required>
-            <input
-              className={inputClass}
-              value={form.line}
-              onChange={set('line')}
-              required
-              placeholder={isParfum ? 'Maison Noir' : 'Audio / Charging'}
-            />
-          </FormField>
         </div>
       </div>
 

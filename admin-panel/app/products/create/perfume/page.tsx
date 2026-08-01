@@ -12,8 +12,12 @@ import {
   formToPayload,
   type ProductFormState,
 } from '@/components/product-form-fields'
-import { createCatalogProduct } from '@/lib/catalog-api'
+import { createCatalogProduct, listCatalogProducts } from '@/lib/catalog-api'
 import { slugify } from '@/lib/catalog-types'
+import {
+  collectPerfumeSuggestions,
+  rememberPerfumeIdentity,
+} from '@/lib/perfume-suggestions'
 
 export default function CreatePerfumePage() {
   const router = useRouter()
@@ -21,12 +25,30 @@ export default function CreatePerfumePage() {
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState<ProductFormState>(() => blankForm({ category: 'parfum' }))
+  const [brandSuggestions, setBrandSuggestions] = useState<string[]>([])
+  const [nameSuggestions, setNameSuggestions] = useState<string[]>([])
 
   useEffect(() => {
     const session = localStorage.getItem('adminSession')
     if (!session) router.push('/login')
     else setIsAuthed(true)
   }, [router])
+
+  useEffect(() => {
+    if (!isAuthed) return
+    ;(async () => {
+      try {
+        const products = await listCatalogProducts()
+        const { brands, names } = collectPerfumeSuggestions(products)
+        setBrandSuggestions(brands)
+        setNameSuggestions(names)
+      } catch {
+        const { brands, names } = collectPerfumeSuggestions([])
+        setBrandSuggestions(brands)
+        setNameSuggestions(names)
+      }
+    })()
+  }, [isAuthed])
 
   if (!isAuthed) return null
 
@@ -44,6 +66,7 @@ export default function CreatePerfumePage() {
       const payload = formToPayload(withIds)
       if (!payload.id) throw new Error('Product id is required')
       await createCatalogProduct(payload)
+      rememberPerfumeIdentity(form.line, form.name)
       router.push('/products')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
@@ -55,7 +78,7 @@ export default function CreatePerfumePage() {
     <LayoutWrapper>
       <Header
         title="Add Perfume"
-        subtitle="LEO SIGNATURE — perfume form with concentration, notes, volumes & multi sub-categories"
+        subtitle="LEO SIGNATURE — brand & name first, then details, notes & images"
       />
 
       <div className="p-8">
@@ -72,6 +95,8 @@ export default function CreatePerfumePage() {
               setForm={setForm}
               idEditable
               lockedCategory="parfum"
+              brandSuggestions={brandSuggestions}
+              nameSuggestions={nameSuggestions}
             />
 
             <div className="border-t hairline-subtle pt-6 flex items-center justify-between">

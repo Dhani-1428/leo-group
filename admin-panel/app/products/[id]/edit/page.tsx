@@ -17,7 +17,12 @@ import {
   getCatalogProduct,
   updateCatalogProduct,
   websiteProductUrl,
+  listCatalogProducts,
 } from '@/lib/catalog-api'
+import {
+  collectPerfumeSuggestions,
+  rememberPerfumeIdentity,
+} from '@/lib/perfume-suggestions'
 
 export default function ProductEditPage() {
   const router = useRouter()
@@ -30,6 +35,8 @@ export default function ProductEditPage() {
   const [error, setError] = useState('')
   const [toast, setToast] = useState('')
   const [form, setForm] = useState<ProductFormState>(blankForm())
+  const [brandSuggestions, setBrandSuggestions] = useState<string[]>([])
+  const [nameSuggestions, setNameSuggestions] = useState<string[]>([])
 
   useEffect(() => {
     const session = localStorage.getItem('adminSession')
@@ -41,8 +48,14 @@ export default function ProductEditPage() {
     if (!isAuthed) return
     ;(async () => {
       try {
-        const product = await getCatalogProduct(id)
+        const [product, products] = await Promise.all([
+          getCatalogProduct(id),
+          listCatalogProducts().catch(() => [] as Awaited<ReturnType<typeof listCatalogProducts>>),
+        ])
         setForm(productToForm(product))
+        const { brands, names } = collectPerfumeSuggestions(products)
+        setBrandSuggestions(brands)
+        setNameSuggestions(names)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to load product')
       } finally {
@@ -61,6 +74,9 @@ export default function ProductEditPage() {
     try {
       const payload = formToPayload(form)
       await updateCatalogProduct(id, payload)
+      if (form.category === 'parfum') {
+        rememberPerfumeIdentity(form.line, form.name)
+      }
       setToast('Saved — live on website')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
@@ -109,6 +125,8 @@ export default function ProductEditPage() {
                 setForm={setForm}
                 idEditable={false}
                 lockedCategory={form.category}
+                brandSuggestions={brandSuggestions}
+                nameSuggestions={nameSuggestions}
               />
 
               <div className="border-t hairline-subtle pt-6 flex items-center justify-between">
