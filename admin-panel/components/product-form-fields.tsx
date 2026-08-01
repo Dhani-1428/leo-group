@@ -5,6 +5,7 @@ import { FormField } from '@/components/form-field'
 import { ImagePlus, Trash2, Upload } from 'lucide-react'
 import {
   CONCENTRATION_OPTIONS,
+  PARFUM_SUB_LABELS,
   PARFUM_SUBS,
   PERFUME_GENDER_OPTIONS,
   TECH_SUBS,
@@ -437,7 +438,9 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
             <select className={inputClass} value={form.subCategory} onChange={set('subCategory')}>
               {subs.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {form.category === 'parfum' && s in PARFUM_SUB_LABELS
+                    ? PARFUM_SUB_LABELS[s as keyof typeof PARFUM_SUB_LABELS]
+                    : s}
                 </option>
               ))}
             </select>

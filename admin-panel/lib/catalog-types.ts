@@ -61,6 +61,16 @@ export const PARFUM_SUBS = [
   "limited-edition",
 ] as const
 
+export const PARFUM_SUB_LABELS: Record<(typeof PARFUM_SUBS)[number], string> = {
+  "for-her": "Women",
+  "for-him": "Men",
+  unisex: "Unisex",
+  attars: "Attars",
+  testers: "Testers",
+  "new-arrivals": "New Arrivals",
+  "limited-edition": "Limited Edition",
+}
+
 export const CONCENTRATION_OPTIONS = [
   "Eau De Cologne",
   "Eau De Toilette",
