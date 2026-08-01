@@ -22,6 +22,13 @@ export const PERFUME_GENDER_OPTIONS = [
 
 export type PerfumeGender = (typeof PERFUME_GENDER_OPTIONS)[number]["key"]
 
+export const AVAILABILITY_OPTIONS = [
+  { key: "online", label: "Available online" },
+  { key: "store", label: "Available in store" },
+] as const
+
+export type AvailabilityChannel = (typeof AVAILABILITY_OPTIONS)[number]["key"]
+
 export type CatalogProduct = {
   id: string
   category: Category
@@ -30,6 +37,8 @@ export type CatalogProduct = {
   subCategories?: string[]
   /** Multi audience: men / women / unisex — product shows in each selected shop filter */
   genders?: PerfumeGender[]
+  /** Where the product can be bought — online, in store, or both */
+  availability?: AvailabilityChannel[]
   name: string
   line: string
   price: number

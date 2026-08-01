@@ -4,10 +4,12 @@ import { useState } from 'react'
 import { FormField } from '@/components/form-field'
 import { ImagePlus, Trash2, Upload } from 'lucide-react'
 import {
+  AVAILABILITY_OPTIONS,
   CONCENTRATION_OPTIONS,
   GENDER_FROM_SUB,
   PARFUM_SUB_OPTIONS,
   TECH_SUBS,
+  type AvailabilityChannel,
   type CatalogProduct,
   type Category,
   type PerfumeGender,
@@ -24,6 +26,7 @@ export type ProductFormState = {
   /** Perfume multi sub-categories (Men / Women / Unisex / Attars …) */
   subCategories: string[]
   genders: PerfumeGender[]
+  availability: AvailabilityChannel[]
   line: string
   price: string
   stock: string
@@ -81,6 +84,7 @@ export function blankForm(overrides: Partial<ProductFormState> = {}): ProductFor
     subCategory: 'for-her',
     subCategories: ['for-her'],
     genders: ['women'],
+    availability: ['online', 'store'],
     line: '',
     price: '',
     stock: '25',
@@ -113,6 +117,10 @@ export function productToForm(p: CatalogProduct): ProductFormState {
     subCategory: p.subCategory || subCategories[0] || (p.category === 'tech' ? 'chargers' : 'for-her'),
     subCategories,
     genders: gendersFromSubs(subCategories),
+    availability:
+      p.availability && p.availability.length > 0
+        ? [...p.availability]
+        : (['online', 'store'] as AvailabilityChannel[]),
     line: p.line,
     price: String(p.price),
     stock: String(p.stock),
@@ -176,6 +184,8 @@ export function formToPayload(form: ProductFormState) {
     short: form.short.trim(),
     description: form.description.trim(),
     status: form.status,
+    availability:
+      form.availability.length > 0 ? form.availability : (['online'] as AvailabilityChannel[]),
     images:
       images.length > 0
         ? images
@@ -421,6 +431,17 @@ export function ProductFormFields({
     })
   }
 
+  const toggleAvailability = (value: AvailabilityChannel) => {
+    setForm((prev) => {
+      const has = prev.availability.includes(value)
+      const availability = has
+        ? prev.availability.filter((x) => x !== value)
+        : [...prev.availability, value]
+      if (availability.length === 0) return prev
+      return { ...prev, availability }
+    })
+  }
+
   const isParfum = form.category === 'parfum'
   const brandListId = 'perfume-brand-suggestions'
   const nameListId = 'perfume-name-suggestions'
@@ -607,6 +628,32 @@ export function ProductFormFields({
             </FormField>
           )}
         </div>
+
+        <FormField
+          label="Availability"
+          required
+          hint="Select one or both — Available online and/or Available in store."
+        >
+          <div className="flex flex-wrap gap-2">
+            {AVAILABILITY_OPTIONS.map((opt) => {
+              const active = form.availability.includes(opt.key)
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => toggleAvailability(opt.key)}
+                  className={`min-w-[9rem] px-4 py-2.5 text-sm tracking-wide transition-colors border ${
+                    active
+                      ? 'border-[#c89b5c] bg-[#c89b5c]/15 text-[#c89b5c]'
+                      : 'border-[#333] text-[#a8a8a8] hover:border-[#c89b5c]/50 hover:text-[#c89b5c]'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              )
+            })}
+          </div>
+        </FormField>
       </div>
 
       <div className="border-t hairline-subtle pt-6">
