@@ -1,7 +1,12 @@
-import { Truck, Shield } from "lucide-react";
+import { Truck, Shield, Phone, Mail, MessageCircle } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useCategory } from "@/lib/categoryContext";
 import { ADMIN_PANEL_URL } from "@/lib/adminPanelUrl";
+
+const PHONE_DISPLAY = "+351 920 575 084";
+const PHONE_TEL = "+351920575084";
+const WHATSAPP_URL = `https://wa.me/351920575084`;
+const EMAIL = "leotechsao@gmail.com";
 
 export function Footer() {
   const { t } = useI18n();
@@ -14,13 +19,14 @@ export function Footer() {
     ? [
         { t: t("footer.col.maison"), l: [t("footer.extraits"), t("footer.eau"), t("footer.limited"), t("footer.discovery")] },
         { t: t("footer.col.account"), l: [t("footer.signin"), t("footer.orders"), t("footer.wishlist"), t("footer.members")] },
-        { t: t("footer.col.cared"), l: [t("footer.contact"), t("footer.shipping"), t("footer.returns"), t("footer.faq")] },
+        { t: t("footer.col.cared"), l: [t("footer.shipping"), t("footer.returns"), t("footer.faq")] },
       ]
     : [
         { t: t("footer.col.studio"), l: [t("footer.audio"), t("footer.cases"), t("footer.charging"), t("footer.horology")] },
         { t: t("footer.col.account"), l: [t("footer.signin"), t("footer.orders"), t("footer.wishlist"), t("footer.members")] },
-        { t: t("footer.col.cared"), l: [t("footer.contact"), t("footer.shipping"), t("footer.returns"), t("footer.faq")] },
+        { t: t("footer.col.cared"), l: [t("footer.shipping"), t("footer.returns"), t("footer.faq")] },
       ];
+
   return (
     <footer className="border-t border-gold/15 bg-obsidian-2 pt-24 pb-10 mt-32 [.theme-tech_&]:bg-sky-50 [.theme-tech_&]:border-blue-200">
       <div className="mx-auto max-w-[1500px] px-6 lg:px-12">
@@ -33,6 +39,37 @@ export function Footer() {
             <div className="mt-8 flex flex-wrap gap-4 text-xs text-muted-foreground [.theme-tech_&]:text-blue-900/70">
               <span className="flex items-center gap-2"><Truck className="h-3.5 w-3.5 text-gold [.theme-tech_&]:text-blue-600" /> {t("footer.free")}</span>
               <span className="flex items-center gap-2"><Shield className="h-3.5 w-3.5 text-gold [.theme-tech_&]:text-blue-600" /> {t("footer.lifetime")}</span>
+            </div>
+
+            <div className="mt-10 space-y-3">
+              <div className="mb-4 text-[10px] tracking-[0.4em] text-gold [.theme-tech_&]:text-blue-600">
+                {t("footer.contact").toUpperCase()}
+              </div>
+              <a
+                href={`tel:${PHONE_TEL}`}
+                className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-gold [.theme-tech_&]:text-blue-900/70 [.theme-tech_&]:hover:text-blue-600"
+              >
+                <Phone className="h-3.5 w-3.5 shrink-0 text-gold [.theme-tech_&]:text-blue-600" />
+                {PHONE_DISPLAY}
+                <span className="text-[10px] tracking-[0.15em] text-foreground/50">· {t("footer.call")}</span>
+              </a>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-gold [.theme-tech_&]:text-blue-900/70 [.theme-tech_&]:hover:text-blue-600"
+              >
+                <MessageCircle className="h-3.5 w-3.5 shrink-0 text-gold [.theme-tech_&]:text-blue-600" />
+                {PHONE_DISPLAY}
+                <span className="text-[10px] tracking-[0.15em] text-foreground/50">· WhatsApp</span>
+              </a>
+              <a
+                href={`mailto:${EMAIL}`}
+                className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-gold [.theme-tech_&]:text-blue-900/70 [.theme-tech_&]:hover:text-blue-600"
+              >
+                <Mail className="h-3.5 w-3.5 shrink-0 text-gold [.theme-tech_&]:text-blue-600" />
+                {EMAIL}
+              </a>
             </div>
           </div>
           {cols.map((c) => (
