@@ -432,7 +432,7 @@ export function ProductFormFields({
             />
           </FormField>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             <FormField label="ID / Slug" required hint="Used in website URL /product/{id}">
               <input
                 className={`${inputClass} font-mono text-sm`}
@@ -450,6 +450,14 @@ export function ProductFormFields({
                 onChange={set('sku')}
                 required
                 placeholder="OUD-IMPERIAL"
+              />
+            </FormField>
+            <FormField label="Tag / Badge">
+              <input
+                className={inputClass}
+                value={form.tag}
+                onChange={set('tag')}
+                placeholder="New, Iconic, Bestseller…"
               />
             </FormField>
           </div>
@@ -478,7 +486,7 @@ export function ProductFormFields({
 
       <div className="border-t hairline-subtle pt-6">
         <h3 className="text-subheading text-foreground mb-4">Classification</h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {!lockedCategory && (
             <FormField label="Category" required>
               <select className={inputClass} value={form.category} onChange={set('category')}>
@@ -535,20 +543,12 @@ export function ProductFormFields({
               placeholder={isParfum ? 'Maison Noir' : 'Audio / Charging'}
             />
           </FormField>
-          <FormField label="Tag / Badge">
-            <input
-              className={inputClass}
-              value={form.tag}
-              onChange={set('tag')}
-              placeholder="New, Iconic, Bestseller…"
-            />
-          </FormField>
         </div>
       </div>
 
       <div className="border-t hairline-subtle pt-6">
         <h3 className="text-subheading text-foreground mb-4">Pricing & Inventory</h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <FormField label="Price (EUR)" required>
             <div className="flex items-center">
               <span className="px-4 py-3 bg-[#0a0a0a] hairline text-[#a8a8a8] text-sm">€</span>
@@ -590,7 +590,7 @@ export function ProductFormFields({
         <div className="border-t hairline-subtle pt-6">
           <h3 className="text-subheading text-foreground mb-4">Perfume details</h3>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               <FormField label="Concentration">
                 <select className={inputClass} value={form.concentration} onChange={set('concentration')}>
                   <option value="">Select concentration</option>
@@ -608,19 +608,21 @@ export function ProductFormFields({
               <FormField label="Perfumer">
                 <input className={inputClass} value={form.perfumer} onChange={set('perfumer')} />
               </FormField>
+              <FormField label="Volumes" hint="Comma-separated">
+                <input className={inputClass} value={form.volumes} onChange={set('volumes')} />
+              </FormField>
             </div>
-            <FormField label="Volumes" hint="Comma-separated">
-              <input className={inputClass} value={form.volumes} onChange={set('volumes')} />
-            </FormField>
-            <FormField label="Top notes" hint="Comma-separated">
-              <input className={inputClass} value={form.notesTop} onChange={set('notesTop')} />
-            </FormField>
-            <FormField label="Heart notes" hint="Comma-separated">
-              <input className={inputClass} value={form.notesHeart} onChange={set('notesHeart')} />
-            </FormField>
-            <FormField label="Base notes" hint="Comma-separated">
-              <input className={inputClass} value={form.notesBase} onChange={set('notesBase')} />
-            </FormField>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <FormField label="Top notes" hint="Comma-separated">
+                <input className={inputClass} value={form.notesTop} onChange={set('notesTop')} />
+              </FormField>
+              <FormField label="Heart notes" hint="Comma-separated">
+                <input className={inputClass} value={form.notesHeart} onChange={set('notesHeart')} />
+              </FormField>
+              <FormField label="Base notes" hint="Comma-separated">
+                <input className={inputClass} value={form.notesBase} onChange={set('notesBase')} />
+              </FormField>
+            </div>
             <FormField label="Ingredients">
               <textarea
                 className={`${inputClass} resize-none`}

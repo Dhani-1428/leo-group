@@ -91,8 +91,8 @@ export default function ProductEditPage() {
         {loading ? (
           <p className="text-[#707070]">Loading…</p>
         ) : (
-          <form onSubmit={handleSubmit} className="max-w-2xl">
-            <div className="bg-[#1a1a1a] hairline p-8 space-y-6">
+          <form onSubmit={handleSubmit} className="w-full">
+            <div className="bg-[#1a1a1a] hairline p-8 space-y-6 w-full">
               {toast && (
                 <div className="px-4 py-3 bg-[#6b9e5f]/15 text-[#6b9e5f] text-body-small">
                   {toast}

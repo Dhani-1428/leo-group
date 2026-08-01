@@ -59,8 +59,8 @@ export default function CreatePerfumePage() {
       />
 
       <div className="p-8">
-        <form onSubmit={handleSubmit} className="max-w-2xl">
-          <div className="bg-[#1a1a1a] hairline p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="w-full">
+          <div className="bg-[#1a1a1a] hairline p-8 space-y-6 w-full">
             {error && (
               <div className="px-4 py-3 bg-[#a85c5c]/15 text-[#a85c5c] text-body-small">
                 {error}
