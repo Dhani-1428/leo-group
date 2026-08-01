@@ -511,6 +511,24 @@ function ProductPage() {
               </div>
             ) : null}
 
+            {(p.availability?.length
+              ? p.availability
+              : (["online", "store"] as const)
+            ).length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {(p.availability?.length ? p.availability : (["online", "store"] as const)).map(
+                  (a) => (
+                    <span
+                      key={a}
+                      className="rounded-full border border-gold/30 px-3 py-1 text-[9px] tracking-[0.25em] text-gold/90"
+                    >
+                      {a === "online" ? "AVAILABLE ONLINE" : "AVAILABLE IN STORE"}
+                    </span>
+                  ),
+                )}
+              </div>
+            )}
+
             {/* Variants */}
             {isParfum && p.volumes && (
               <div className="mt-10">
