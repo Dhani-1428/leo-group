@@ -61,8 +61,8 @@ export type Product = {
   subCategories?: ParfumSubCategory[];
   /** Multi audience tags for perfume (Men / Women / Unisex). Product appears in each selected filter. */
   genders?: PerfumeGender[];
-  /** Buy channels — online, in-store, or both. */
-  availability?: Array<"online" | "store">;
+  /** Buy channels — online, in-store, unavailable, or a mix. */
+  availability?: Array<"online" | "store" | "unavailable">;
 
   name: string;
   line: string;

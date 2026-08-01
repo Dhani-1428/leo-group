@@ -25,6 +25,7 @@ export type PerfumeGender = (typeof PERFUME_GENDER_OPTIONS)[number]["key"]
 export const AVAILABILITY_OPTIONS = [
   { key: "online", label: "Available online" },
   { key: "store", label: "Available in store" },
+  { key: "unavailable", label: "Not available" },
 ] as const
 
 export type AvailabilityChannel = (typeof AVAILABILITY_OPTIONS)[number]["key"]

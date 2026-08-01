@@ -520,9 +520,17 @@ function ProductPage() {
                   (a) => (
                     <span
                       key={a}
-                      className="rounded-full border border-gold/30 px-3 py-1 text-[9px] tracking-[0.25em] text-gold/90"
+                      className={`rounded-full border px-3 py-1 text-[9px] tracking-[0.25em] ${
+                        a === "unavailable"
+                          ? "border-red-400/40 text-red-400/90"
+                          : "border-gold/30 text-gold/90"
+                      }`}
                     >
-                      {a === "online" ? "AVAILABLE ONLINE" : "AVAILABLE IN STORE"}
+                      {a === "online"
+                        ? "AVAILABLE ONLINE"
+                        : a === "store"
+                          ? "AVAILABLE IN STORE"
+                          : "NOT AVAILABLE"}
                     </span>
                   ),
                 )}

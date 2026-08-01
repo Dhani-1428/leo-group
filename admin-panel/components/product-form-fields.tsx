@@ -434,11 +434,17 @@ export function ProductFormFields({
   const toggleAvailability = (value: AvailabilityChannel) => {
     setForm((prev) => {
       const has = prev.availability.includes(value)
-      const availability = has
-        ? prev.availability.filter((x) => x !== value)
-        : [...prev.availability, value]
-      if (availability.length === 0) return prev
-      return { ...prev, availability }
+      if (has) {
+        const availability = prev.availability.filter((x) => x !== value)
+        if (availability.length === 0) return prev
+        return { ...prev, availability }
+      }
+      // "Not available" is exclusive; online/store clear unavailable
+      if (value === 'unavailable') {
+        return { ...prev, availability: ['unavailable'] }
+      }
+      const withoutUnavailable = prev.availability.filter((x) => x !== 'unavailable')
+      return { ...prev, availability: [...withoutUnavailable, value] }
     })
   }
 
@@ -632,7 +638,7 @@ export function ProductFormFields({
         <FormField
           label="Availability"
           required
-          hint="Select one or both — Available online and/or Available in store."
+          hint="Select online and/or in store — or Not available."
         >
           <div className="flex flex-wrap gap-2">
             {AVAILABILITY_OPTIONS.map((opt) => {
