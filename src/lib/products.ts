@@ -57,6 +57,8 @@ export type Product = {
   id: string;
   category: Category;
   subCategory?: TechSubCategory | ParfumSubCategory;
+  /** Multi perfume shop filters — product appears under each selected slug. */
+  subCategories?: ParfumSubCategory[];
   /** Multi audience tags for perfume (Men / Women / Unisex). Product appears in each selected filter. */
   genders?: PerfumeGender[];
 

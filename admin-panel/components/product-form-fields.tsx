@@ -5,9 +5,8 @@ import { FormField } from '@/components/form-field'
 import { ImagePlus, Trash2, Upload } from 'lucide-react'
 import {
   CONCENTRATION_OPTIONS,
-  PARFUM_SUB_LABELS,
-  PARFUM_SUBS,
-  PERFUME_GENDER_OPTIONS,
+  GENDER_FROM_SUB,
+  PARFUM_SUB_OPTIONS,
   TECH_SUBS,
   type CatalogProduct,
   type Category,
@@ -22,6 +21,8 @@ export type ProductFormState = {
   sku: string
   category: Category
   subCategory: string
+  /** Perfume multi sub-categories (Men / Women / Unisex / Attars …) */
+  subCategories: string[]
   genders: PerfumeGender[]
   line: string
   price: string
@@ -43,12 +44,32 @@ export type ProductFormState = {
   inTheBox: string
 }
 
-function gendersFromProduct(p: CatalogProduct): PerfumeGender[] {
-  if (p.genders && p.genders.length > 0) return [...p.genders]
-  if (p.subCategory === 'for-her') return ['women']
-  if (p.subCategory === 'for-him') return ['men']
-  if (p.subCategory === 'unisex') return ['unisex']
-  return []
+const PERFUME_GENDER_TO_SUB: Record<PerfumeGender, string> = {
+  women: 'for-her',
+  men: 'for-him',
+  unisex: 'unisex',
+}
+
+function subCategoriesFromProduct(p: CatalogProduct): string[] {
+  if (p.subCategories && p.subCategories.length > 0) return [...p.subCategories]
+  const fromGenders = (p.genders || [])
+    .map((g) => PERFUME_GENDER_TO_SUB[g])
+    .filter(Boolean) as string[]
+  if (fromGenders.length > 0) {
+    const extra =
+      p.subCategory && !['for-her', 'for-him', 'unisex'].includes(p.subCategory)
+        ? [p.subCategory]
+        : []
+    return [...new Set([...fromGenders, ...extra])]
+  }
+  if (p.subCategory) return [p.subCategory]
+  return ['for-her']
+}
+
+function gendersFromSubs(subs: string[]): PerfumeGender[] {
+  return subs
+    .map((s) => GENDER_FROM_SUB[s])
+    .filter((g): g is PerfumeGender => Boolean(g))
 }
 
 export function blankForm(overrides: Partial<ProductFormState> = {}): ProductFormState {
@@ -58,6 +79,7 @@ export function blankForm(overrides: Partial<ProductFormState> = {}): ProductFor
     sku: '',
     category: 'parfum',
     subCategory: 'for-her',
+    subCategories: ['for-her'],
     genders: ['women'],
     line: '',
     price: '',
@@ -82,13 +104,15 @@ export function blankForm(overrides: Partial<ProductFormState> = {}): ProductFor
 }
 
 export function productToForm(p: CatalogProduct): ProductFormState {
+  const subCategories = subCategoriesFromProduct(p)
   return blankForm({
     id: p.id,
     name: p.name,
     sku: p.sku,
     category: p.category,
-    subCategory: p.subCategory || (p.category === 'tech' ? 'chargers' : 'for-her'),
-    genders: gendersFromProduct(p),
+    subCategory: p.subCategory || subCategories[0] || (p.category === 'tech' ? 'chargers' : 'for-her'),
+    subCategories,
+    genders: gendersFromSubs(subCategories),
     line: p.line,
     price: String(p.price),
     stock: String(p.stock),
@@ -141,7 +165,10 @@ export function formToPayload(form: ProductFormState) {
     sku: form.sku.trim() || form.id.trim().toUpperCase(),
     name: form.name.trim(),
     category: form.category,
-    subCategory: form.subCategory,
+    subCategory:
+      form.category === 'parfum'
+        ? form.subCategories[0] || form.subCategory || 'for-her'
+        : form.subCategory,
     line: form.line.trim() || (form.category === 'parfum' ? 'Maison Noir' : 'Accessories'),
     price: Number(form.price) || 0,
     stock: Math.max(0, Math.floor(Number(form.stock) || 0)),
@@ -158,9 +185,12 @@ export function formToPayload(form: ProductFormState) {
   }
 
   if (form.category === 'parfum') {
+    const subCategories =
+      form.subCategories.length > 0 ? form.subCategories : [base.subCategory]
     return {
       ...base,
-      genders: form.genders,
+      subCategories,
+      genders: gendersFromSubs(subCategories),
       concentration: form.concentration || undefined,
       volumes: splitList(form.volumes),
       perfumer: form.perfumer || undefined,
@@ -175,6 +205,7 @@ export function formToPayload(form: ProductFormState) {
 
   return {
     ...base,
+    subCategories: undefined,
     genders: undefined,
     specs: parseSpecs(form.specs),
     compatibility: splitList(form.compatibility),
@@ -347,24 +378,35 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
       setForm((prev) => {
         const next = { ...prev, [key]: value }
         if (key === 'category') {
-          next.subCategory = value === 'tech' ? TECH_SUBS[0] : PARFUM_SUBS[0]
-          next.genders = value === 'parfum' ? ['women'] : []
+          if (value === 'tech') {
+            next.subCategory = TECH_SUBS[0]
+            next.subCategories = []
+            next.genders = []
+          } else {
+            next.subCategory = 'for-her'
+            next.subCategories = ['for-her']
+            next.genders = ['women']
+          }
         }
         return next
       })
     }
 
-  const toggleGender = (g: PerfumeGender) => {
+  const toggleParfumSub = (value: string) => {
     setForm((prev) => {
-      const has = prev.genders.includes(g)
-      const genders = has ? prev.genders.filter((x) => x !== g) : [...prev.genders, g]
-      // Keep at least one selected when editing perfume
-      if (genders.length === 0) return prev
-      return { ...prev, genders }
+      const has = prev.subCategories.includes(value)
+      const subCategories = has
+        ? prev.subCategories.filter((x) => x !== value)
+        : [...prev.subCategories, value]
+      if (subCategories.length === 0) return prev
+      return {
+        ...prev,
+        subCategories,
+        subCategory: subCategories[0],
+        genders: gendersFromSubs(subCategories),
+      }
     })
   }
-
-  const subs = form.category === 'tech' ? TECH_SUBS : PARFUM_SUBS
 
   return (
     <div className="space-y-6">
@@ -434,31 +476,22 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
               <option value="tech">Tech Hub (LEO TECH)</option>
             </select>
           </FormField>
-          <FormField label="Sub-category" required>
-            <select className={inputClass} value={form.subCategory} onChange={set('subCategory')}>
-              {subs.map((s) => (
-                <option key={s} value={s}>
-                  {form.category === 'parfum' && s in PARFUM_SUB_LABELS
-                    ? PARFUM_SUB_LABELS[s as keyof typeof PARFUM_SUB_LABELS]
-                    : s}
-                </option>
-              ))}
-            </select>
-          </FormField>
-          {form.category === 'parfum' && (
+
+          {form.category === 'parfum' ? (
             <FormField
-              label="Audience"
-              hint="Click one or more. Product appears in each selected shop filter (e.g. Men + Unisex)."
+              label="Sub-category"
+              required
+              hint="Click one or more. Example: Men + Unisex → shows under both on the shop."
             >
               <div className="flex flex-wrap gap-2">
-                {PERFUME_GENDER_OPTIONS.map((opt) => {
-                  const active = form.genders.includes(opt.key)
+                {PARFUM_SUB_OPTIONS.map((opt) => {
+                  const active = form.subCategories.includes(opt.value)
                   return (
                     <button
-                      key={opt.key}
+                      key={opt.value}
                       type="button"
-                      onClick={() => toggleGender(opt.key)}
-                      className={`px-4 py-2.5 text-sm tracking-wide transition-colors border ${
+                      onClick={() => toggleParfumSub(opt.value)}
+                      className={`min-w-[5.5rem] px-4 py-2.5 text-sm tracking-wide transition-colors border ${
                         active
                           ? 'border-[#c89b5c] bg-[#c89b5c]/15 text-[#c89b5c]'
                           : 'border-[#333] text-[#a8a8a8] hover:border-[#c89b5c]/50 hover:text-[#c89b5c]'
@@ -470,7 +503,18 @@ export function ProductFormFields({ form, setForm, idEditable = true }: Props) {
                 })}
               </div>
             </FormField>
+          ) : (
+            <FormField label="Sub-category" required>
+              <select className={inputClass} value={form.subCategory} onChange={set('subCategory')}>
+                {TECH_SUBS.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </FormField>
           )}
+
           <FormField label="Line / Collection" required>
             <input
               className={inputClass}

@@ -15,9 +15,9 @@ export type Review = {
 }
 
 export const PERFUME_GENDER_OPTIONS = [
-  { key: "women", label: "Women" },
-  { key: "men", label: "Men" },
-  { key: "unisex", label: "Unisex" },
+  { key: "men", label: "Men", sub: "for-him" },
+  { key: "women", label: "Women", sub: "for-her" },
+  { key: "unisex", label: "Unisex", sub: "unisex" },
 ] as const
 
 export type PerfumeGender = (typeof PERFUME_GENDER_OPTIONS)[number]["key"]
@@ -26,6 +26,8 @@ export type CatalogProduct = {
   id: string
   category: Category
   subCategory?: string
+  /** Extra perfume shop filters (multi). Product appears in each selected filter. */
+  subCategories?: string[]
   /** Multi audience: men / women / unisex — product shows in each selected shop filter */
   genders?: PerfumeGender[]
   name: string
@@ -51,24 +53,27 @@ export type CatalogProduct = {
   sku: string
 }
 
-export const PARFUM_SUBS = [
-  "for-her",
-  "for-him",
-  "unisex",
-  "attars",
-  "testers",
-  "new-arrivals",
-  "limited-edition",
+/** Clickable perfume sub-categories (multi-select in admin). */
+export const PARFUM_SUB_OPTIONS = [
+  { value: "for-him", label: "Men" },
+  { value: "for-her", label: "Women" },
+  { value: "unisex", label: "Unisex" },
+  { value: "attars", label: "Attars" },
+  { value: "testers", label: "Testers" },
+  { value: "new-arrivals", label: "New Arrivals" },
+  { value: "limited-edition", label: "Limited Edition" },
 ] as const
 
-export const PARFUM_SUB_LABELS: Record<(typeof PARFUM_SUBS)[number], string> = {
-  "for-her": "Women",
-  "for-him": "Men",
-  unisex: "Unisex",
-  attars: "Attars",
-  testers: "Testers",
-  "new-arrivals": "New Arrivals",
-  "limited-edition": "Limited Edition",
+export const PARFUM_SUBS = PARFUM_SUB_OPTIONS.map((o) => o.value)
+
+export const PARFUM_SUB_LABELS: Record<string, string> = Object.fromEntries(
+  PARFUM_SUB_OPTIONS.map((o) => [o.value, o.label]),
+)
+
+export const GENDER_FROM_SUB: Record<string, PerfumeGender> = {
+  "for-her": "women",
+  "for-him": "men",
+  unisex: "unisex",
 }
 
 export const CONCENTRATION_OPTIONS = [

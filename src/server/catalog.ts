@@ -75,6 +75,10 @@ export async function upsertProduct(
       id: input.id,
       category: input.category,
       subCategory: input.subCategory ?? existing?.subCategory,
+      subCategories:
+        input.category === "parfum"
+          ? (input.subCategories !== undefined ? input.subCategories : existing?.subCategories)
+          : undefined,
       genders:
         input.category === "parfum"
           ? (input.genders !== undefined ? input.genders : existing?.genders)
