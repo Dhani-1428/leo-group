@@ -11,13 +11,13 @@ interface HeaderProps {
 export function Header({ title, subtitle, actions }: HeaderProps) {
   return (
     <div className="bg-[#1a1a1a] hairline border-b">
-      <div className="px-8 py-6 flex items-center justify-between">
-        <div className="flex-1">
+      <div className="px-8 py-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0 flex-1">
           <h2 className="text-heading text-foreground">{title}</h2>
           {subtitle && <p className="text-body-small text-[#a8a8a8] mt-1">{subtitle}</p>}
         </div>
 
-        {actions && <div className="flex items-center gap-4">{actions}</div>}
+        {actions && <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div>}
 
         {!actions && (
           <div className="flex items-center gap-4">

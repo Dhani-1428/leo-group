@@ -107,6 +107,33 @@ export default function ProductsPage() {
       />
 
       <div className="p-8">
+        <div className="mb-8 grid gap-4 sm:grid-cols-2">
+          <Link
+            href="/products/create/perfume"
+            className="flex items-center gap-4 border border-[#c89b5c]/40 bg-[#c89b5c]/10 px-5 py-5 transition-colors hover:bg-[#c89b5c]/20"
+          >
+            <Plus className="h-6 w-6 shrink-0 text-[#c89b5c]" />
+            <div>
+              <div className="font-medium text-[#c89b5c]">Add Perfume</div>
+              <div className="mt-1 text-sm text-[#a8a8a8]">
+                Concentration, notes, volumes, Men / Women / Unisex
+              </div>
+            </div>
+          </Link>
+          <Link
+            href="/products/create/tech"
+            className="flex items-center gap-4 border border-[#333] bg-[#1a1a1a] px-5 py-5 transition-colors hover:border-[#c89b5c]/50"
+          >
+            <Plus className="h-6 w-6 shrink-0 text-[#a8a8a8]" />
+            <div>
+              <div className="font-medium text-foreground">Add Tech</div>
+              <div className="mt-1 text-sm text-[#a8a8a8]">
+                Specs, compatibility, and what&apos;s in the box
+              </div>
+            </div>
+          </Link>
+        </div>
+
         {toast && (
           <div className="mb-4 px-4 py-3 bg-[#6b9e5f]/15 text-[#6b9e5f] text-body-small">
             {toast}
