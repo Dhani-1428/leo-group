@@ -13,7 +13,6 @@ import {
   LogOut,
   Sparkles,
   Cpu,
-  Plus,
 } from 'lucide-react'
 
 export function Sidebar() {
@@ -90,25 +89,6 @@ export function Sidebar() {
               </div>
             )
           })}
-        </div>
-
-        {/* Always-visible create shortcuts */}
-        <div className="mt-6 space-y-2 border-t border-[#333] pt-4">
-          <p className="px-4 text-[10px] uppercase tracking-[0.2em] text-[#707070]">Create</p>
-          <Link
-            href="/products/create/perfume"
-            className="flex items-center gap-3 px-4 py-3 text-[#c89b5c] hover:bg-[#c89b5c]/10 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="text-sm font-medium">Add Perfume</span>
-          </Link>
-          <Link
-            href="/products/create/tech"
-            className="flex items-center gap-3 px-4 py-3 text-[#a8a8a8] hover:text-[#c89b5c] hover:bg-[#2a2a2a] transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="text-sm font-medium">Add Tech</span>
-          </Link>
         </div>
       </nav>
 
