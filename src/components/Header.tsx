@@ -24,10 +24,18 @@ export function Header() {
   const [hydrated, setHydrated] = useState(false);
   const bagCount = useBagStore((s) => s.items.reduce((n, i) => n + i.qty, 0));
   const wishCount = useBagStore((s) => s.wishlist.length);
+  const cartOpenNonce = useBagStore((s) => s.cartOpenNonce);
 
   useEffect(() => {
     setHydrated(true);
   }, []);
+
+  // Open bag when something is added (or cart is requested)
+  useEffect(() => {
+    if (!hydrated || cartOpenNonce <= 0) return;
+    setOpen(false);
+    setPanel("cart");
+  }, [cartOpenNonce, hydrated]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);

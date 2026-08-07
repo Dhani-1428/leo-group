@@ -9,16 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as CheckoutSuccessRouteImport } from './routes/checkout/success'
+import { Route as CheckoutCancelRouteImport } from './routes/checkout/cancel'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as ApiCatalogRouteImport } from './routes/api/catalog'
 import { Route as ShopCategorySubRouteImport } from './routes/shop.$category.$sub'
+import { Route as ApiWebhooksStripeRouteImport } from './routes/api/webhooks/stripe'
 import { Route as ApiUploadsSplatRouteImport } from './routes/api/uploads.$'
+import { Route as ApiHealthDbRouteImport } from './routes/api/health/db'
+import { Route as ApiCheckoutSessionRouteImport } from './routes/api/checkout/session'
+import { Route as ApiCheckoutCreateSessionRouteImport } from './routes/api/checkout/create-session'
 import { Route as ApiCatalogIdRouteImport } from './routes/api/catalog/$id'
+import { Route as ApiAuthResetPasswordRouteImport } from './routes/api/auth/reset-password'
+import { Route as ApiAuthRegisterRouteImport } from './routes/api/auth/register'
+import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
+import { Route as ApiAuthForgotPasswordRouteImport } from './routes/api/auth/forgot-password'
 import { Route as ApiCatalogIdStockRouteImport } from './routes/api/catalog/$id.stock'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -32,6 +48,16 @@ const IndexRoute = IndexRouteImport.update({
 const ProductIdRoute = ProductIdRouteImport.update({
   id: '/product/$id',
   path: '/product/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
+  id: '/checkout/success',
+  path: '/checkout/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutCancelRoute = CheckoutCancelRouteImport.update({
+  id: '/checkout/cancel',
+  path: '/checkout/cancel',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiUploadRoute = ApiUploadRouteImport.update({
@@ -49,15 +75,56 @@ const ShopCategorySubRoute = ShopCategorySubRouteImport.update({
   path: '/shop/$category/$sub',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWebhooksStripeRoute = ApiWebhooksStripeRouteImport.update({
+  id: '/api/webhooks/stripe',
+  path: '/api/webhooks/stripe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiUploadsSplatRoute = ApiUploadsSplatRouteImport.update({
   id: '/api/uploads/$',
   path: '/api/uploads/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHealthDbRoute = ApiHealthDbRouteImport.update({
+  id: '/api/health/db',
+  path: '/api/health/db',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCheckoutSessionRoute = ApiCheckoutSessionRouteImport.update({
+  id: '/api/checkout/session',
+  path: '/api/checkout/session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCheckoutCreateSessionRoute =
+  ApiCheckoutCreateSessionRouteImport.update({
+    id: '/api/checkout/create-session',
+    path: '/api/checkout/create-session',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiCatalogIdRoute = ApiCatalogIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ApiCatalogRoute,
+} as any)
+const ApiAuthResetPasswordRoute = ApiAuthResetPasswordRouteImport.update({
+  id: '/api/auth/reset-password',
+  path: '/api/auth/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthRegisterRoute = ApiAuthRegisterRouteImport.update({
+  id: '/api/auth/register',
+  path: '/api/auth/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
+  id: '/api/auth/login',
+  path: '/api/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthForgotPasswordRoute = ApiAuthForgotPasswordRouteImport.update({
+  id: '/api/auth/forgot-password',
+  path: '/api/auth/forgot-password',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCatalogIdStockRoute = ApiCatalogIdStockRouteImport.update({
   id: '/stock',
@@ -68,22 +135,44 @@ const ApiCatalogIdStockRoute = ApiCatalogIdStockRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/api/catalog': typeof ApiCatalogRouteWithChildren
   '/api/upload': typeof ApiUploadRoute
+  '/checkout/cancel': typeof CheckoutCancelRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/auth/forgot-password': typeof ApiAuthForgotPasswordRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/register': typeof ApiAuthRegisterRoute
+  '/api/auth/reset-password': typeof ApiAuthResetPasswordRoute
   '/api/catalog/$id': typeof ApiCatalogIdRouteWithChildren
+  '/api/checkout/create-session': typeof ApiCheckoutCreateSessionRoute
+  '/api/checkout/session': typeof ApiCheckoutSessionRoute
+  '/api/health/db': typeof ApiHealthDbRoute
   '/api/uploads/$': typeof ApiUploadsSplatRoute
+  '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/shop/$category/$sub': typeof ShopCategorySubRoute
   '/api/catalog/$id/stock': typeof ApiCatalogIdStockRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/api/catalog': typeof ApiCatalogRouteWithChildren
   '/api/upload': typeof ApiUploadRoute
+  '/checkout/cancel': typeof CheckoutCancelRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/auth/forgot-password': typeof ApiAuthForgotPasswordRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/register': typeof ApiAuthRegisterRoute
+  '/api/auth/reset-password': typeof ApiAuthResetPasswordRoute
   '/api/catalog/$id': typeof ApiCatalogIdRouteWithChildren
+  '/api/checkout/create-session': typeof ApiCheckoutCreateSessionRoute
+  '/api/checkout/session': typeof ApiCheckoutSessionRoute
+  '/api/health/db': typeof ApiHealthDbRoute
   '/api/uploads/$': typeof ApiUploadsSplatRoute
+  '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/shop/$category/$sub': typeof ShopCategorySubRoute
   '/api/catalog/$id/stock': typeof ApiCatalogIdStockRoute
 }
@@ -91,11 +180,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/api/catalog': typeof ApiCatalogRouteWithChildren
   '/api/upload': typeof ApiUploadRoute
+  '/checkout/cancel': typeof CheckoutCancelRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/auth/forgot-password': typeof ApiAuthForgotPasswordRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/register': typeof ApiAuthRegisterRoute
+  '/api/auth/reset-password': typeof ApiAuthResetPasswordRoute
   '/api/catalog/$id': typeof ApiCatalogIdRouteWithChildren
+  '/api/checkout/create-session': typeof ApiCheckoutCreateSessionRoute
+  '/api/checkout/session': typeof ApiCheckoutSessionRoute
+  '/api/health/db': typeof ApiHealthDbRoute
   '/api/uploads/$': typeof ApiUploadsSplatRoute
+  '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/shop/$category/$sub': typeof ShopCategorySubRoute
   '/api/catalog/$id/stock': typeof ApiCatalogIdStockRoute
 }
@@ -104,33 +204,66 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/reset-password'
     | '/api/catalog'
     | '/api/upload'
+    | '/checkout/cancel'
+    | '/checkout/success'
     | '/product/$id'
+    | '/api/auth/forgot-password'
+    | '/api/auth/login'
+    | '/api/auth/register'
+    | '/api/auth/reset-password'
     | '/api/catalog/$id'
+    | '/api/checkout/create-session'
+    | '/api/checkout/session'
+    | '/api/health/db'
     | '/api/uploads/$'
+    | '/api/webhooks/stripe'
     | '/shop/$category/$sub'
     | '/api/catalog/$id/stock'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
+    | '/reset-password'
     | '/api/catalog'
     | '/api/upload'
+    | '/checkout/cancel'
+    | '/checkout/success'
     | '/product/$id'
+    | '/api/auth/forgot-password'
+    | '/api/auth/login'
+    | '/api/auth/register'
+    | '/api/auth/reset-password'
     | '/api/catalog/$id'
+    | '/api/checkout/create-session'
+    | '/api/checkout/session'
+    | '/api/health/db'
     | '/api/uploads/$'
+    | '/api/webhooks/stripe'
     | '/shop/$category/$sub'
     | '/api/catalog/$id/stock'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/reset-password'
     | '/api/catalog'
     | '/api/upload'
+    | '/checkout/cancel'
+    | '/checkout/success'
     | '/product/$id'
+    | '/api/auth/forgot-password'
+    | '/api/auth/login'
+    | '/api/auth/register'
+    | '/api/auth/reset-password'
     | '/api/catalog/$id'
+    | '/api/checkout/create-session'
+    | '/api/checkout/session'
+    | '/api/health/db'
     | '/api/uploads/$'
+    | '/api/webhooks/stripe'
     | '/shop/$category/$sub'
     | '/api/catalog/$id/stock'
   fileRoutesById: FileRoutesById
@@ -138,15 +271,33 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ApiCatalogRoute: typeof ApiCatalogRouteWithChildren
   ApiUploadRoute: typeof ApiUploadRoute
+  CheckoutCancelRoute: typeof CheckoutCancelRoute
+  CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ProductIdRoute: typeof ProductIdRoute
+  ApiAuthForgotPasswordRoute: typeof ApiAuthForgotPasswordRoute
+  ApiAuthLoginRoute: typeof ApiAuthLoginRoute
+  ApiAuthRegisterRoute: typeof ApiAuthRegisterRoute
+  ApiAuthResetPasswordRoute: typeof ApiAuthResetPasswordRoute
+  ApiCheckoutCreateSessionRoute: typeof ApiCheckoutCreateSessionRoute
+  ApiCheckoutSessionRoute: typeof ApiCheckoutSessionRoute
+  ApiHealthDbRoute: typeof ApiHealthDbRoute
   ApiUploadsSplatRoute: typeof ApiUploadsSplatRoute
+  ApiWebhooksStripeRoute: typeof ApiWebhooksStripeRoute
   ShopCategorySubRoute: typeof ShopCategorySubRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -166,6 +317,20 @@ declare module '@tanstack/react-router' {
       path: '/product/$id'
       fullPath: '/product/$id'
       preLoaderRoute: typeof ProductIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/success': {
+      id: '/checkout/success'
+      path: '/checkout/success'
+      fullPath: '/checkout/success'
+      preLoaderRoute: typeof CheckoutSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/cancel': {
+      id: '/checkout/cancel'
+      path: '/checkout/cancel'
+      fullPath: '/checkout/cancel'
+      preLoaderRoute: typeof CheckoutCancelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/upload': {
@@ -189,11 +354,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopCategorySubRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/webhooks/stripe': {
+      id: '/api/webhooks/stripe'
+      path: '/api/webhooks/stripe'
+      fullPath: '/api/webhooks/stripe'
+      preLoaderRoute: typeof ApiWebhooksStripeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/uploads/$': {
       id: '/api/uploads/$'
       path: '/api/uploads/$'
       fullPath: '/api/uploads/$'
       preLoaderRoute: typeof ApiUploadsSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health/db': {
+      id: '/api/health/db'
+      path: '/api/health/db'
+      fullPath: '/api/health/db'
+      preLoaderRoute: typeof ApiHealthDbRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/checkout/session': {
+      id: '/api/checkout/session'
+      path: '/api/checkout/session'
+      fullPath: '/api/checkout/session'
+      preLoaderRoute: typeof ApiCheckoutSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/checkout/create-session': {
+      id: '/api/checkout/create-session'
+      path: '/api/checkout/create-session'
+      fullPath: '/api/checkout/create-session'
+      preLoaderRoute: typeof ApiCheckoutCreateSessionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/catalog/$id': {
@@ -202,6 +395,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/catalog/$id'
       preLoaderRoute: typeof ApiCatalogIdRouteImport
       parentRoute: typeof ApiCatalogRoute
+    }
+    '/api/auth/reset-password': {
+      id: '/api/auth/reset-password'
+      path: '/api/auth/reset-password'
+      fullPath: '/api/auth/reset-password'
+      preLoaderRoute: typeof ApiAuthResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/register': {
+      id: '/api/auth/register'
+      path: '/api/auth/register'
+      fullPath: '/api/auth/register'
+      preLoaderRoute: typeof ApiAuthRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/login': {
+      id: '/api/auth/login'
+      path: '/api/auth/login'
+      fullPath: '/api/auth/login'
+      preLoaderRoute: typeof ApiAuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/forgot-password': {
+      id: '/api/auth/forgot-password'
+      path: '/api/auth/forgot-password'
+      fullPath: '/api/auth/forgot-password'
+      preLoaderRoute: typeof ApiAuthForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/catalog/$id/stock': {
       id: '/api/catalog/$id/stock'
@@ -240,10 +461,21 @@ const ApiCatalogRouteWithChildren = ApiCatalogRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ApiCatalogRoute: ApiCatalogRouteWithChildren,
   ApiUploadRoute: ApiUploadRoute,
+  CheckoutCancelRoute: CheckoutCancelRoute,
+  CheckoutSuccessRoute: CheckoutSuccessRoute,
   ProductIdRoute: ProductIdRoute,
+  ApiAuthForgotPasswordRoute: ApiAuthForgotPasswordRoute,
+  ApiAuthLoginRoute: ApiAuthLoginRoute,
+  ApiAuthRegisterRoute: ApiAuthRegisterRoute,
+  ApiAuthResetPasswordRoute: ApiAuthResetPasswordRoute,
+  ApiCheckoutCreateSessionRoute: ApiCheckoutCreateSessionRoute,
+  ApiCheckoutSessionRoute: ApiCheckoutSessionRoute,
+  ApiHealthDbRoute: ApiHealthDbRoute,
   ApiUploadsSplatRoute: ApiUploadsSplatRoute,
+  ApiWebhooksStripeRoute: ApiWebhooksStripeRoute,
   ShopCategorySubRoute: ShopCategorySubRoute,
 }
 export const routeTree = rootRouteImport

@@ -76,14 +76,16 @@ const PARFUM_SUB_ITEMS: { key: ParfumSubCategory | "all"; tk: string }[] = [
 function LoadingScreen({ onDone }: { onDone: () => void }) {
   const { t: tt } = useI18n();
   useEffect(() => {
-    const t = setTimeout(onDone, 2200);
+    const t = setTimeout(onDone, 1800);
     return () => clearTimeout(t);
-  }, [onDone]);
+    // intentionally run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <motion.div
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
-      className="fixed inset-0 z-[100] grid place-items-center bg-obsidian noise"
+      exit={{ opacity: 0, transition: { duration: 0.6, ease: "easeInOut" } }}
+      className="pointer-events-none fixed inset-0 z-[100] grid place-items-center bg-obsidian noise"
     >
       <div className="relative flex flex-col items-center gap-8">
         <motion.div
@@ -684,9 +686,10 @@ function BestSellers({
                     </span>
                     <img src={p.images[0]} alt={p.name} loading="lazy" width={800} height={1000}
                       className="h-full w-full object-cover transition-all duration-[1200ms] group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-obsidian/85 via-obsidian/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                    <div className="absolute inset-x-3 bottom-3 flex flex-col gap-2 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-obsidian/85 via-obsidian/20 to-transparent opacity-100 md:opacity-0 transition-opacity duration-500 md:group-hover:opacity-100" />
+                    <div className="absolute inset-x-3 bottom-3 z-20 flex flex-col gap-2 translate-y-0 opacity-100 transition-all duration-500 md:translate-y-4 md:opacity-0 md:pointer-events-none md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-hover:pointer-events-auto">
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -703,16 +706,23 @@ function BestSellers({
                         {t("card.addcart")}
                       </button>
                       <button
-                        onClick={(e) => {
+                        type="button"
+                        onClick={async (e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          addToBag({
-                            productId: p.id,
-                            name: p.name,
-                            line: p.line,
-                            price: p.price,
-                            image: p.images[0],
-                          });
+                          try {
+                            const { buyProductNow } = await import("@/lib/cartActions");
+                            await buyProductNow({
+                              productId: p.id,
+                              name: p.name,
+                              line: p.line,
+                              price: p.price,
+                              image: p.images[0],
+                            });
+                          } catch (err) {
+                            console.error(err);
+                            alert(err instanceof Error ? err.message : "Checkout failed");
+                          }
                         }}
                         className="w-full rounded-full border border-gold/60 bg-obsidian/70 py-2.5 text-[10px] font-semibold tracking-[0.3em] text-gold backdrop-blur hover:bg-gold hover:text-obsidian transition-colors"
                       >
@@ -999,9 +1009,12 @@ function HomePage() {
   const [techFilter, setTechFilter] = useState<TechSubCategory | "all">("all");
   const [parfumFilter, setParfumFilter] = useState<ParfumSubCategory | "all">("all");
 
+  // Stable callback so LoadingScreen timeout is not reset on every re-render
+  const dismissLoading = useRef(() => setLoading(false)).current;
+
   return (
     <>
-      <AnimatePresence>{loading && <LoadingScreen onDone={() => setLoading(false)} />}</AnimatePresence>
+      <AnimatePresence>{loading && <LoadingScreen onDone={dismissLoading} />}</AnimatePresence>
       <LuxCursor />
       <main className="relative">
         <CategorySwitchBar category={category} setCategory={setCategory} />

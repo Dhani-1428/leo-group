@@ -428,24 +428,42 @@ function ProductPage() {
   const [variant, setVariant] = useState<string>(isParfum ? p.volumes?.[1] ?? "" : "");
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [buying, setBuying] = useState(false);
+  const [buyError, setBuyError] = useState("");
 
   const addToBag = useBagStore((s) => s.addToBag);
   const toggleWishlist = useBagStore((s) => s.toggleWishlist);
   const wished = useBagStore((s) => s.wishlist.some((w) => w.productId === p.id));
 
+  const cartPayload = () => ({
+    productId: p.id,
+    name: p.name,
+    line: p.line,
+    price: p.price,
+    image: p.images[0],
+    variant: variant || undefined,
+    qty,
+  });
+
   const addToCart = () => {
     if (!inStock) return;
-    addToBag({
-      productId: p.id,
-      name: p.name,
-      line: p.line,
-      price: p.price,
-      image: p.images[0],
-      variant: variant || undefined,
-      qty,
-    });
+    setBuyError("");
+    addToBag(cartPayload());
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
+  };
+
+  const buyNow = async () => {
+    if (!inStock || buying) return;
+    setBuyError("");
+    setBuying(true);
+    try {
+      const { buyProductNow } = await import("@/lib/cartActions");
+      await buyProductNow(cartPayload());
+    } catch (err) {
+      setBuyError(err instanceof Error ? err.message : "Checkout failed");
+      setBuying(false);
+    }
   };
 
   const onWish = () => {
@@ -578,6 +596,7 @@ function ProductPage() {
             <div className="mt-10 flex flex-col gap-3">
               <div className="flex gap-3">
                 <button
+                  type="button"
                   onClick={addToCart}
                   disabled={!inStock}
                   data-cursor
@@ -604,6 +623,7 @@ function ProductPage() {
                   <span className="absolute inset-0 shimmer" />
                 </button>
                 <button
+                  type="button"
                   onClick={onWish}
                   data-cursor
                   className={`grid w-14 place-items-center rounded-full border transition-all ${
@@ -614,13 +634,15 @@ function ProductPage() {
                 </button>
               </div>
               <button
-                onClick={addToCart}
-                disabled={!inStock}
+                type="button"
+                onClick={buyNow}
+                disabled={!inStock || buying}
                 data-cursor
                 className="rounded-full border border-gold/30 py-5 text-xs font-medium tracking-[0.3em] text-foreground hover:bg-gold/5 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                BUY NOW
+                {buying ? "REDIRECTING…" : "BUY NOW"}
               </button>
+              {buyError && <p className="text-center text-xs text-red-400">{buyError}</p>}
             </div>
 
             {/* Reassurance */}

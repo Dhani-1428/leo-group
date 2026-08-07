@@ -19,6 +19,8 @@ dist-ssr
 
 # Shared catalog persistence (generated at runtime)
 data/catalog.json
+data/users.json
+data/orders.json
 data/uploads/*
 !data/uploads/.gitkeep
 

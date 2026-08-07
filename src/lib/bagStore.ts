@@ -33,18 +33,22 @@ type State = {
   items: BagItem[];
   wishlist: WishItem[];
   accountEmail: string | null;
+  accountName: string | null;
+  /** Incremented to ask Header to open the cart panel */
+  cartOpenNonce: number;
 };
 
 type Actions = {
-  addToBag: (item: AddInput) => void;
+  addToBag: (item: AddInput, opts?: { openCart?: boolean }) => void;
   removeFromBag: (productId: string, variant?: string) => void;
   setQty: (productId: string, qty: number, variant?: string) => void;
   clearBag: () => void;
   toggleWishlist: (item: WishItem) => void;
   isWished: (productId: string) => boolean;
   removeFromWishlist: (productId: string) => void;
-  signIn: (email: string) => void;
+  signIn: (email: string, name?: string | null) => void;
   signOut: () => void;
+  requestOpenCart: () => void;
   bagCount: () => number;
   bagTotal: () => number;
 };
@@ -59,15 +63,21 @@ export const useBagStore = create<State & Actions>()(
       items: [],
       wishlist: [],
       accountEmail: null,
+      accountName: null,
+      cartOpenNonce: 0,
 
-      addToBag: (item) =>
+      addToBag: (item, opts) =>
         set((s) => {
           const qty = Math.max(1, item.qty ?? 1);
+          const openCart = opts?.openCart !== false;
           const i = s.items.findIndex((x) => sameLine(x, item.productId, item.variant));
           if (i >= 0) {
             const next = [...s.items];
             next[i] = { ...next[i], qty: next[i].qty + qty };
-            return { items: next };
+            return {
+              items: next,
+              ...(openCart ? { cartOpenNonce: s.cartOpenNonce + 1 } : {}),
+            };
           }
           return {
             items: [
@@ -82,6 +92,7 @@ export const useBagStore = create<State & Actions>()(
                 qty,
               },
             ],
+            ...(openCart ? { cartOpenNonce: s.cartOpenNonce + 1 } : {}),
           };
         }),
 
@@ -120,12 +131,26 @@ export const useBagStore = create<State & Actions>()(
           wishlist: s.wishlist.filter((w) => w.productId !== productId),
         })),
 
-      signIn: (email) => set({ accountEmail: email.trim() || null }),
-      signOut: () => set({ accountEmail: null }),
+      signIn: (email, name) =>
+        set({
+          accountEmail: email.trim() || null,
+          accountName: name?.trim() || null,
+        }),
+      signOut: () => set({ accountEmail: null, accountName: null }),
+
+      requestOpenCart: () => set((s) => ({ cartOpenNonce: s.cartOpenNonce + 1 })),
 
       bagCount: () => get().items.reduce((n, i) => n + i.qty, 0),
       bagTotal: () => get().items.reduce((n, i) => n + i.price * i.qty, 0),
     }),
-    { name: "leo.bag.v1" },
+    {
+      name: "leo.bag.v1",
+      partialize: (s) => ({
+        items: s.items,
+        wishlist: s.wishlist,
+        accountEmail: s.accountEmail,
+        accountName: s.accountName,
+      }),
+    },
   ),
 );

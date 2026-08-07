@@ -90,9 +90,10 @@ function ShopPage() {
                       loading="lazy"
                       className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-obsidian/85 via-obsidian/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                    <div className="absolute inset-x-3 bottom-3 flex flex-col gap-2 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-obsidian/85 via-obsidian/10 to-transparent opacity-100 md:opacity-0 transition-opacity duration-500 md:group-hover:opacity-100" />
+                    <div className="absolute inset-x-3 bottom-3 z-20 flex flex-col gap-2 translate-y-0 opacity-100 transition-all duration-500 md:translate-y-4 md:opacity-0 md:pointer-events-none md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-hover:pointer-events-auto">
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -109,16 +110,23 @@ function ShopPage() {
                         {t("card.addcart")}
                       </button>
                       <button
-                        onClick={(e) => {
+                        type="button"
+                        onClick={async (e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          addToBag({
-                            productId: p.id,
-                            name: p.name,
-                            line: p.line,
-                            price: p.price,
-                            image: p.images[0],
-                          });
+                          try {
+                            const { buyProductNow } = await import("@/lib/cartActions");
+                            await buyProductNow({
+                              productId: p.id,
+                              name: p.name,
+                              line: p.line,
+                              price: p.price,
+                              image: p.images[0],
+                            });
+                          } catch (err) {
+                            console.error(err);
+                            alert(err instanceof Error ? err.message : "Checkout failed");
+                          }
                         }}
                         className="w-full rounded-full border border-gold/60 bg-obsidian/70 py-2.5 text-[10px] font-semibold tracking-[0.3em] text-gold backdrop-blur hover:bg-gold hover:text-obsidian transition-colors"
                       >
